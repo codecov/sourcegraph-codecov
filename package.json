@@ -1,0 +1,34 @@
+{
+  "name": "cx-codecov",
+  "version": "0.0.0-development",
+  "description": "A CXP extension that displays code coverage from [Codecov](https://codecov.io).",
+  "license": "MIT",
+  "main": "lib/cx-codecov.js",
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "build": "parcel build --no-minify --detailed-report --experimental-scope-hoisting cx-codecov.ts",
+    "serve": "parcel serve --no-hmr cx-codecov.ts",
+    "prettier": "prettier '**/*.{js?(on),ts}' --write --list-different",
+    "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
+    "test": "echo No tests yet."
+  },
+  "browserslist": [
+    "last 1 Chrome versions",
+    "last 1 Firefox versions",
+    "last 1 Edge versions",
+    "last 1 Safari versions"
+  ],
+  "devDependencies": {
+    "parcel-bundler": "^1.9.6",
+    "prettier": "^1.13.7",
+    "typescript": "^2.9.2",
+    "tslint": "^5.10.0",
+    "tslint-language-service": "^0.9.9"
+  },
+  "dependencies": {
+    "cxp": "^1.2.1"
+  },
+  "sideEffects": false
+}
