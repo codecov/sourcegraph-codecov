@@ -1,0 +1,8 @@
+node_modules/
+.git/
+coverage/
+.cache/
+lib/
+dist/
+package.json
+package-lock.json
