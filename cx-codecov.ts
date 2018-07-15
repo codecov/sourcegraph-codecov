@@ -2,8 +2,8 @@ import { createWebWorkerMessageTransports } from 'cxp/lib/jsonrpc2/transports/we
 import { InitializeResult, InitializeParams } from 'cxp/lib/protocol'
 import {
   TextDocumentDecoration,
-  TextDocumentDecorationsParams,
-} from 'cxp/lib/protocol/decorations'
+  TextDocumentDecorationParams,
+} from 'cxp/lib/protocol/decoration'
 import { Connection, createConnection } from 'cxp/lib/server/server'
 import { URI } from 'cxp/lib/types/textDocument'
 
@@ -28,14 +28,14 @@ function createServer(connection: Connection): void {
       }
 
       return {
-        capabilities: { decorationsProvider: { static: true } },
+        capabilities: { decorationProvider: { static: true } },
       } as InitializeResult
     }
   )
 
-  connection.onTextDocumentDecorations(
+  connection.onTextDocumentDecoration(
     async (
-      params: TextDocumentDecorationsParams
+      params: TextDocumentDecorationParams
     ): Promise<TextDocumentDecoration[]> => {
       const { path } = parseURI(params.textDocument.uri)
       if (!parsedRoot || !parsedRoot.repo || !parsedRoot.rev || !path) {
