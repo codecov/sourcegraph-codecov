@@ -21,11 +21,11 @@
     "last 1 Safari versions"
   ],
   "devDependencies": {
-    "parcel-bundler": "^1.9.6",
+    "parcel-bundler": "^1.9.7",
     "prettier": "^1.13.7",
-    "typescript": "^2.9.2",
     "tslint": "^5.10.0",
-    "tslint-language-service": "^0.9.9"
+    "tslint-language-service": "^0.9.9",
+    "typescript": "^2.9.2"
   },
   "dependencies": {
     "cxp": "^6.2.0"
