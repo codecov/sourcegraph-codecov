@@ -28,7 +28,7 @@
     "tslint-language-service": "^0.9.9"
   },
   "dependencies": {
-    "cxp": "^2.0.0"
+    "cxp": "^6.2.0"
   },
   "sideEffects": false
 }
