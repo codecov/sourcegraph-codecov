@@ -114,11 +114,12 @@ export function run(connection: Connection): void {
       if (isEqual(settings, newSettings)) {
         return // nothing to do
       }
-      await registerContributions(newSettings)
-      await publishDecorations(newSettings, textDocuments.all())
-      // Wait until we've updated client state, to avoid doing duplicate work in reponse to a simultaneous
-      // textDocument/didOpen.
       settings = newSettings
+      // Don't bother updating client view state if there is no document yet.
+      if (lastOpenedTextDocument) {
+        await registerContributions(newSettings)
+        await publishDecorations(newSettings, textDocuments.all())
+      }
     }
   )
 
