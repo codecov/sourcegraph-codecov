@@ -4,7 +4,9 @@ import {
   TextDocumentDecoration,
   ExecuteCommandParams,
   ConfigurationUpdateRequest,
+  MenuItemContribution,
   ConfigurationUpdateParams,
+  CommandContribution,
   Contributions,
   DidChangeConfigurationParams,
   RegistrationRequest,
@@ -17,7 +19,10 @@ import { TextDocuments } from 'cxp/module/server/features/textDocumentSync'
 import { isEqual } from 'cxp/module/util'
 import { TextDocument } from 'vscode-languageserver-types'
 
-const TOGGLE_COMMAND_ID = 'codecov.toggle'
+const TOGGLE_ALL_DECORATIONS_COMMAND_ID = 'codecov.decorations.toggleAll'
+const TOGGLE_HITS_DECORATIONS_COMMAND_ID = 'codecov.decorations.hits.toggle'
+const VIEW_COVERAGE_DETAILS_COMMAND_ID = 'codecov.viewCoverageDetails'
+const SET_API_TOKEN_COMMAND_ID = 'codecov.setAPIToken'
 
 /** The user settings for this extension. */
 interface ExtensionSettings {
@@ -100,7 +105,10 @@ export function run(connection: Connection): void {
             openClose: true,
           },
           executeCommandProvider: {
-            commands: [TOGGLE_COMMAND_ID],
+            commands: [
+              TOGGLE_ALL_DECORATIONS_COMMAND_ID,
+              TOGGLE_HITS_DECORATIONS_COMMAND_ID,
+            ],
           },
           decorationProvider: { dynamic: true },
         },
@@ -131,29 +139,51 @@ export function run(connection: Connection): void {
   })
 
   connection.onExecuteCommand((params: ExecuteCommandParams) => {
+    const executeConfigurationCommand = (
+      newSettings: ExtensionSettings,
+      configParams: ConfigurationUpdateParams
+    ) => {
+      // Run async to avoid blocking our response (and leading to a deadlock).
+      connection
+        .sendRequest(ConfigurationUpdateRequest.type, configParams)
+        .catch(err => console.error('configuration/update:', err))
+      registerContributions(newSettings).catch(err =>
+        console.error('registerContributions:', err)
+      )
+      publishDecorations(newSettings, textDocuments.all()).catch(err =>
+        console.error('publishDecorations:', err)
+      )
+    }
+
     switch (params.command) {
-      case TOGGLE_COMMAND_ID:
+      case TOGGLE_ALL_DECORATIONS_COMMAND_ID:
+      case TOGGLE_HITS_DECORATIONS_COMMAND_ID:
         if (!settings) {
           throw new Error('settings are not yet available')
         }
         if (!settings.decorations) {
           settings.decorations = {}
         }
-        settings.decorations.hide = settings.decorations.hide ? undefined : true
-
-        // Run async to avoid blocking our response (and leading to a deadlock).
-        connection
-          .sendRequest(ConfigurationUpdateRequest.type, {
-            path: ['decorations', 'hide'],
-            value: settings.decorations.hide,
-          } as ConfigurationUpdateParams)
-          .catch(err => console.error('configuration/update:', err))
-        registerContributions(settings).catch(err =>
-          console.error('registerContributions:', err)
-        )
-        publishDecorations(settings, textDocuments.all()).catch(err =>
-          console.error('publishDecorations:', err)
-        )
+        switch (params.command) {
+          case TOGGLE_ALL_DECORATIONS_COMMAND_ID:
+            settings.decorations.hide = settings.decorations.hide
+              ? undefined
+              : true
+            executeConfigurationCommand(settings, {
+              path: ['decorations', 'hide'],
+              value: settings.decorations.hide,
+            })
+            break
+          case TOGGLE_HITS_DECORATIONS_COMMAND_ID:
+            settings.decorations.lineHitCounts = !resolveDecorationSettings(
+              settings
+            ).lineHitCounts
+            executeConfigurationCommand(settings, {
+              path: ['decorations', 'lineHitCounts'],
+              value: settings.decorations.lineHitCounts,
+            })
+            break
+        }
         break
 
       default:
@@ -165,29 +195,62 @@ export function run(connection: Connection): void {
   async function registerContributions(
     settings: ExtensionSettings
   ): Promise<void> {
-    const contributions: Contributions = {}
+    const contributions: Contributions = {
+      commands: [],
+      menus: { 'editor/title': [], commandPalette: [] },
+    }
     if (lastOpenedTextDocument) {
       const fileCoverage = await getCoverageForFile({
         token: settings.token,
         ...resolveURI(root, lastOpenedTextDocument.uri),
       })
-      contributions.commands = [
-        {
-          command: TOGGLE_COMMAND_ID,
-          title: fileCoverage.ratio
-            ? `Coverage: ${parseFloat(fileCoverage.ratio).toFixed(0)}%`
-            : 'Coverage',
-          detail: `Codecov: ${
-            !settings.decorations || !settings.decorations.hide
-              ? 'Hide'
-              : 'Show'
-          } code coverage`,
-        },
-      ]
-      contributions.menus = {
-        'editor/title': [{ command: TOGGLE_COMMAND_ID }],
+      contributions.commands!.push({
+        command: TOGGLE_ALL_DECORATIONS_COMMAND_ID,
+        title: fileCoverage.ratio
+          ? `Coverage: ${parseFloat(fileCoverage.ratio).toFixed(0)}%`
+          : 'Coverage',
+        detail: `Codecov: ${
+          !settings.decorations || !settings.decorations.hide ? 'Hide' : 'Show'
+        } code coverage`,
+      })
+      const menuItem: MenuItemContribution = {
+        command: TOGGLE_ALL_DECORATIONS_COMMAND_ID,
       }
+      contributions.menus!['editor/title']!.push(menuItem)
     }
+
+    // Always add global commands.
+    const globalCommands: {
+      command: CommandContribution
+      menuItem: MenuItemContribution
+    }[] = [
+      {
+        command: {
+          command: TOGGLE_HITS_DECORATIONS_COMMAND_ID,
+          title: 'Codecov: Toggle line hit/branch counts',
+        },
+        menuItem: { command: TOGGLE_HITS_DECORATIONS_COMMAND_ID },
+      },
+      {
+        command: {
+          command: VIEW_COVERAGE_DETAILS_COMMAND_ID,
+          title: 'Codecov: View coverage details',
+        },
+        menuItem: { command: VIEW_COVERAGE_DETAILS_COMMAND_ID },
+      },
+      {
+        command: {
+          command: SET_API_TOKEN_COMMAND_ID,
+          title: 'Codecov: Set API token for private repositories...',
+        },
+        menuItem: { command: SET_API_TOKEN_COMMAND_ID },
+      },
+    ]
+    for (const { command, menuItem } of globalCommands) {
+      contributions.commands!.push(command)
+      contributions.menus!['commandPalette']!.push(menuItem)
+    }
+
     await connection.sendRequest(RegistrationRequest.type, {
       registrations: [
         {
