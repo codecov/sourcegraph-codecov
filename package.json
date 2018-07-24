@@ -8,7 +8,7 @@
     "lib"
   ],
   "scripts": {
-    "build": "parcel build --no-minify --detailed-report --experimental-scope-hoisting cx-codecov.ts",
+    "build": "parcel build --no-minify --detailed-report cx-codecov.ts",
     "serve": "parcel serve --no-hmr cx-codecov.ts",
     "prettier": "prettier '**/*.{js?(on),ts}' --write --list-different",
     "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
