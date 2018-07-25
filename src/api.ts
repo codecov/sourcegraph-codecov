@@ -1,5 +1,49 @@
 import { ResolvedURI } from './uri'
 
+/** The response data from the Codecov API for a commit. */
+export interface CodecovCommitData {
+  commit: {
+    commitid: string
+    report: {
+      files: {
+        [path: string]: {
+          /** Line coverage data for this file at this commit.. */
+          l: {
+            /**
+             * The coverage for the line (1-indexed).
+             * @type {number} number of hits on a fully covered line
+             * @type {string} "(partial hits)/branches" on a partially covered line
+             * @type {null} skipped line
+             */
+            [line: number]: number | string | null
+          }
+
+          /** Totals for this file at this commit. */
+          t: {
+            /** The coverage ratio for this file, as a string (e.g., "62.5000000"). */
+            c: string
+          }
+        }
+      }
+    }
+    totals: {
+      /** The coverage ratio of the repository at this commit. */
+      coverage: number
+    }
+  }
+  owner: {
+    /** An identifier for the code host or other service where this repository lives. */
+    service: 'github' | string
+
+    /** For GitHub, the name of the repository's owner. */
+    username: string
+  }
+  repo: {
+    /** The repository name (without the owner). */
+    name: string
+  }
+}
+
 export interface GetCoverageArgs
   extends Pick<ResolvedURI, Exclude<keyof ResolvedURI, 'path'>> {
   token: string | undefined
