@@ -1,7 +1,7 @@
-import { ParsedURI } from './model'
+import { ResolvedURI } from './uri'
 
 export interface GetCoverageArgs
-  extends Pick<ParsedURI, Exclude<keyof ParsedURI, 'path'>> {
+  extends Pick<ResolvedURI, Exclude<keyof ResolvedURI, 'path'>> {
   token: string | undefined
 }
 

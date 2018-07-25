@@ -1,11 +1,5 @@
 import { getCoverageForRepoRev, GetCoverageArgs } from './api'
 
-export interface ParsedURI {
-  repo: string
-  rev: string
-  path: string
-}
-
 export interface FileCoverage {
   ratio?: string
   lines?: { [line: string]: LineCoverage }

@@ -3,7 +3,7 @@ const CODECOV_BRAND_COLOR = '#E0225C'
 /** Returns a data: URI of the Codecov logo with the given background color. */
 export function iconURL(foregroundColor: string = CODECOV_BRAND_COLOR): string {
   // It is safe to use btoa because we know that its argument is ASCII.
-  return `data:image/svg+xml;base64,` + btoa(iconSVGWithColor(foregroundColor))
+  return `data:image/svg+xml,` + iconSVGWithColor(foregroundColor)
 }
 
 function iconSVGWithColor(foregroundColor: string): string {

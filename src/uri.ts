@@ -1,17 +1,24 @@
-import { ParsedURI } from './model'
+/**
+ * A resolved URI identifies a path in a repository at a specific revision.
+ */
+export interface ResolvedURI {
+  repo: string
+  rev: string
+  path: string
+}
 
 /**
  * Resolve a URI of the forms git://github.com/owner/repo?rev#path and file:///path to an absolute reference, using
  * the given base (root) URI.
  */
 export function resolveURI(
-  base: Pick<ParsedURI, 'repo' | 'rev'> | null,
+  base: Pick<ResolvedURI, 'repo' | 'rev'> | null,
   uri: string
-): ParsedURI {
-  const url = new URL(uri.replace(/^git:/, 'http:'))
-  if (url.protocol === 'http:') {
+): ResolvedURI {
+  const url = new URL(uri)
+  if (url.protocol === 'git:') {
     return {
-      repo: url.host + url.pathname,
+      repo: (url.host + url.pathname).replace(/^\/*/, ''),
       rev: url.search.slice(1),
       path: url.hash.slice(1),
     }

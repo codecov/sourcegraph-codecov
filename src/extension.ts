@@ -23,10 +23,10 @@ import { isEqual } from '../../cxp-js/module/util'
 import { TextDocument } from 'vscode-languageserver-types/lib/umd/main'
 import { iconURL } from './icon'
 import { ExtensionSettings, resolveDecorationSettings } from './settings'
-import { Model, ParsedURI } from './model'
+import { Model } from './model'
 import { codecovToDecorations } from './decoration'
 import { hsla, GREEN_HUE, RED_HUE } from './colors'
-import { resolveURI } from './util'
+import { resolveURI, ResolvedURI } from './uri'
 
 const TOGGLE_ALL_DECORATIONS_COMMAND_ID = 'codecov.decorations.toggleAll'
 const TOGGLE_HITS_DECORATIONS_COMMAND_ID = 'codecov.decorations.hits.toggle'
@@ -36,7 +36,7 @@ const HELP_COMMAND_ID = 'codecov.help'
 
 export function run(connection: Connection): void {
   let initialized = false
-  let root: Pick<ParsedURI, 'repo' | 'rev'> | null = null
+  let root: Pick<ResolvedURI, 'repo' | 'rev'> | null = null
   let settings: ExtensionSettings | undefined
   let lastOpenedTextDocument: TextDocument | undefined
 
@@ -278,7 +278,7 @@ export function run(connection: Connection): void {
   }
 
   async function getDecorations(
-    root: Pick<ParsedURI, 'repo' | 'rev'> | null,
+    root: Pick<ResolvedURI, 'repo' | 'rev'> | null,
     settings: ExtensionSettings,
     uri: string
   ): Promise<TextDocumentDecoration[]> {
