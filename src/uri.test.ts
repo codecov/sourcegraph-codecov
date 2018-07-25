@@ -1,5 +1,9 @@
 import * as assert from 'assert'
-import { resolveURI, ResolvedURI } from './uri'
+import {
+  resolveURI,
+  ResolvedURI,
+  codecovParamsForRepositoryCommit,
+} from './uri'
 
 describe('resolveURI', () => {
   describe('parsing', () => {
@@ -54,4 +58,31 @@ describe('resolveURI', () => {
 
   it('refuses other URI schemes', () =>
     assert.throws(() => resolveURI(null, 'example://a')))
+})
+
+describe('codecovParamsForRepo', () => {
+  it('handles valid GitHub.com repositories', () =>
+    assert.deepStrictEqual(
+      codecovParamsForRepositoryCommit({
+        repo: 'github.com/owner/repo',
+        rev: 'v',
+      }),
+      { service: 'gh', owner: 'owner', repo: 'repo', sha: 'v' }
+    ))
+
+  it('throws an error for invalid GitHub.com repositories', () =>
+    assert.throws(() =>
+      codecovParamsForRepositoryCommit({
+        repo: 'github.com/owner/repo/invalid',
+        rev: 'v',
+      })
+    ))
+
+  it('throws an error for unsupported repositories', () =>
+    assert.throws(() =>
+      codecovParamsForRepositoryCommit({
+        repo: 'example.com/owner/repo',
+        rev: 'v',
+      })
+    ))
 })

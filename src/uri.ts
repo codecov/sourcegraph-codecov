@@ -1,3 +1,5 @@
+import { GetCommitCoverageDataArgs } from './api'
+
 /**
  * A resolved URI identifies a path in a repository at a specific revision.
  */
@@ -18,8 +20,8 @@ export function resolveURI(
   const url = new URL(uri)
   if (url.protocol === 'git:') {
     return {
-      repo: (url.host + url.pathname).replace(/^\/*/, ''),
-      rev: url.search.slice(1),
+      repo: (url.host + url.pathname).replace(/^\/*/, '').toLowerCase(),
+      rev: url.search.slice(1).toLowerCase(),
       path: url.hash.slice(1),
     }
   }
@@ -33,5 +35,31 @@ export function resolveURI(
     `unrecognized URI: ${JSON.stringify(
       uri
     )} (supported URI schemes: git, file)`
+  )
+}
+
+/** Returns the URL parameters used to access the Codecov API for the URI's repository. */
+export function codecovParamsForRepositoryCommit(
+  uri: Pick<ResolvedURI, 'repo' | 'rev'>
+): Pick<GetCommitCoverageDataArgs, 'service' | 'owner' | 'repo' | 'sha'> {
+  // TODO: Support services (code hosts) other than GitHub.com, such as GitHub Enterprise, GitLab, etc.
+  if (uri.repo.startsWith('github.com/')) {
+    const parts = uri.repo.split('/', 4)
+    if (parts.length !== 3) {
+      throw new Error(
+        `invalid GitHub.com repository: ${JSON.stringify(
+          uri.repo
+        )} (expected "github.com/owner/repo")`
+      )
+    }
+    return {
+      service: 'gh',
+      owner: parts[1],
+      repo: parts[2],
+      sha: uri.rev,
+    }
+  }
+  throw new Error(
+    `extension does not yet support the repository ${JSON.stringify(uri.repo)}`
   )
 }

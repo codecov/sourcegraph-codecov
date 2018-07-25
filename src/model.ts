@@ -1,4 +1,4 @@
-import { getCoverageForRepoRev, GetCoverageArgs } from './api'
+import { getCommitCoverageData, GetCommitCoverageDataArgs } from './api'
 
 export interface FileCoverage {
   ratio?: string
@@ -11,8 +11,8 @@ export class Model {
   public static async getCoverageForFile({
     path,
     ...args
-  }: { path: string } & GetCoverageArgs): Promise<FileCoverage> {
-    const data = await getCoverageForRepoRev(args)
+  }: { path: string } & GetCommitCoverageDataArgs): Promise<FileCoverage> {
+    const data = await getCommitCoverageData(args)
     const fileData = data.commit.report.files[path]
     return fileData ? asFileCoverage(fileData) : {}
   }

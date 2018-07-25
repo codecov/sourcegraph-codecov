@@ -32,7 +32,7 @@ export interface CodecovCommitData {
     }
   }
   owner: {
-    /** An identifier for the code host or other service where this repository lives. */
+    /** An identifier for the code host or other service where the repository lives. */
     service: 'github' | string
 
     /** For GitHub, the name of the repository's owner. */
@@ -44,38 +44,69 @@ export interface CodecovCommitData {
   }
 }
 
-export interface GetCoverageArgs
-  extends Pick<ResolvedURI, Exclude<keyof ResolvedURI, 'path'>> {
-  token: string | undefined
+/** The arguments for getCommitCoverageData. */
+export interface GetCommitCoverageDataArgs {
+  /**
+   * The base URL of the Codecov instance.
+   * @example https://codecov.io
+   */
+  baseURL: string
+
+  /** The identifier for the service where the repository lives. */
+  service: 'gh' | string
+
+  /** The value for the :owner URL parameter (the repository's owner). */
+  owner: string
+
+  /** The value for the :repo URL parameter (the repository's name). */
+  repo: string
+
+  /** The value for the :sha URL parameter (the Git commit SHA). */
+  sha: string
+
+  /** The Codecov API token (required for private repositories). */
+  token?: string
 }
 
-export const getCoverageForRepoRev = memoizeAsync(
-  async ({ token, repo, rev }: GetCoverageArgs): Promise<any> => {
-    // TODO: support other code hosts
-    const codeHost = 'gh'
-    repo = repo.replace(/^github\.com\//, '')
-
-    // TODO: support self-hosted codecov (not just codecov.io)
-    const resp = await fetch(
-      `https://codecov.io/api/${codeHost}/${repo}/commits/${rev}?src=extension`,
-      {
-        method: 'GET',
-        mode: 'cors',
-        credentials: 'omit',
-        headers: token ? { Authorization: `token ${token}` } : undefined,
-      }
-    )
-    return resp.json()
-  },
-  ({ token, repo, rev }) => `${token}:${repo}:${rev}`
+/**
+ * Gets the Codecov coverage data for a single commit of a repository.
+ *
+ * See https://docs.codecov.io/v5.0.0/reference#section-get-a-single-commit.
+ */
+export const getCommitCoverageData = memoizeAsync(
+  async (args: GetCommitCoverageDataArgs): Promise<any> =>
+    (await fetch(commitCoverageDataURL(args), {
+      method: 'GET',
+      mode: 'cors',
+      credentials: 'omit',
+      headers: { 'X-Requested-By': 'cx-codecov' },
+    })).json(),
+  commitCoverageDataURL
 )
+
+/**
+ * Constructs the URL for Codecov coverage data for a single commit of a repository.
+ *
+ * See https://docs.codecov.io/v5.0.0/reference#section-get-a-single-commit.
+ */
+function commitCoverageDataURL({
+  baseURL,
+  service,
+  owner,
+  repo,
+  sha,
+  token,
+}: GetCommitCoverageDataArgs): string {
+  // The ?src=extension is necessary to get the data for all files in the response.
+  return `${baseURL}/api/${service}/${owner}/${repo}/commits/${sha}?src=extension&access_token=${token}`
+}
 
 /**
  * Creates a function that memoizes the async result of func. If the Promise is rejected, the result will not be
  * cached.
  *
- * @param toKey If resolver provided, it determines the cache key for storing the result based on the first
- * argument provided to the memoized function.
+ * @param toKey etermines the cache key for storing the result based on the first argument provided to the memoized
+ * function
  */
 function memoizeAsync<P, T>(
   func: (params: P) => Promise<T>,
