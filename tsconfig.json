@@ -20,11 +20,11 @@
     "skipLibCheck": true,
     "declaration": false,
     "outDir": "lib",
+    "noEmit": true,
     "plugins": [
       {
         "name": "tslint-language-service"
       }
     ]
-  },
-  "include": ["*.ts"]
+  }
 }

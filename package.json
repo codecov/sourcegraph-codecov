@@ -3,16 +3,37 @@
   "version": "0.0.0-development",
   "description": "A CXP extension that displays code coverage from [Codecov](https://codecov.io).",
   "license": "MIT",
-  "main": "lib/cx-codecov.js",
+  "main": "lib/extension.js",
   "files": [
     "lib"
   ],
   "scripts": {
-    "build": "parcel build --no-minify --detailed-report cx-codecov.ts",
-    "serve": "parcel serve --no-hmr cx-codecov.ts",
     "prettier": "prettier '**/*.{js?(on),ts}' --write --list-different",
     "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
-    "test": "echo No tests yet."
+    "typecheck": "tsc -p tsconfig.json",
+    "build": "parcel build --no-minify --detailed-report",
+    "serve": "parcel serve --no-hmr",
+    "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --require ts-node/register --require source-map-support/register --opts mocha.opts",
+    "cover": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' nyc --require ts-node/register --require source-map-support/register --all mocha --opts mocha.opts --timeout 10000",
+    "watch:typecheck": "tsc -p tsconfig.json -w",
+    "watch:build": "tsc -p tsconfig.dist.json -w",
+    "watch:test": "npm run test -- -w"
+  },
+  "nyc": {
+    "extension": [
+      ".ts"
+    ],
+    "exclude": [
+      "examples/",
+      "**/*.d.ts",
+      "**/*.test.ts",
+      "**/*.js"
+    ],
+    "cache": true,
+    "reporter": [
+      "text",
+      "lcovonly"
+    ]
   },
   "browserslist": [
     "last 1 Chrome versions",
@@ -25,7 +46,12 @@
     "prettier": "^1.13.7",
     "tslint": "^5.10.0",
     "tslint-language-service": "^0.9.9",
-    "typescript": "^2.9.2"
+    "typescript": "^2.9.2",
+    "@types/mocha": "^5.2.3",
+    "mocha": "^5.2.0",
+    "nyc": "^12.0.2",
+    "source-map-support": "^0.5.6",
+    "ts-node": "^7.0.0"
   },
   "dependencies": {
     "cxp": "^6.2.0",
