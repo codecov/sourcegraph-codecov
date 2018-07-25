@@ -475,11 +475,8 @@ const getCoverageForFile = memoizeAsync(
     repo = repo.replace(/^github\.com\//, '')
 
     // TODO: support self-hosted codecov (not just codecov.io)
-    //
-    // TODO: remove this cors-anywhere proxy when codecov supports CORS
-    const corsAnywhereURL = 'https://ca9911a.ngrok.io/'
     const resp = await fetch(
-      `${corsAnywhereURL}https://codecov.io/api/${codeHost}/${repo}/commits/${rev}?src=extension`,
+      `https://codecov.io/api/${codeHost}/${repo}/commits/${rev}?src=extension`,
       {
         method: 'GET',
         mode: 'cors',
