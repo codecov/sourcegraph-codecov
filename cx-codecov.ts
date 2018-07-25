@@ -153,7 +153,7 @@ export function run(connection: Connection): void {
         if (!lastOpenedTextDocument) {
           registerContributions(settings!)
         }
-      }, 500)
+      })
     }
   })
 
@@ -459,17 +459,22 @@ function lineText(
   }
 }
 
-interface GetCoverageArgs extends ParsedURI {
+interface GetCoverageArgs
+  extends Pick<ParsedURI, Exclude<keyof ParsedURI, 'path'>> {
   token: string | undefined
 }
 
-const getCoverageForFile = memoizeAsync(
-  async ({
-    token,
-    repo,
-    rev,
-    path,
-  }: GetCoverageArgs): Promise<FileCoverage> => {
+async function getCoverageForFile({
+  path,
+  ...args
+}: { path: string } & GetCoverageArgs): Promise<FileCoverage> {
+  const data = await getCoverageForRepoRev(args)
+  const fileData = data.commit.report.files[path]
+  return fileData ? asFileCoverage(fileData) : {}
+}
+
+const getCoverageForRepoRev = memoizeAsync(
+  async ({ token, repo, rev }: GetCoverageArgs): Promise<any> => {
     // TODO: support other code hosts
     const codeHost = 'gh'
     repo = repo.replace(/^github\.com\//, '')
@@ -484,10 +489,9 @@ const getCoverageForFile = memoizeAsync(
         headers: token ? { Authorization: `token ${token}` } : undefined,
       }
     )
-    const fileData = (await resp.json()).commit.report.files[path]
-    return fileData ? asFileCoverage(fileData) : {}
+    return resp.json()
   },
-  ({ token, repo, rev, path }) => `${token}:${repo}:${rev}:${path}`
+  ({ token, repo, rev }) => `${token}:${repo}:${rev}`
 )
 
 /** Mutates data to make it a FileCoverage. */
