@@ -1,48 +1,50 @@
 import * as assert from 'assert'
-import { resolveDecorationSettings, DecorationSettings } from './settings'
+import { resolveSettings, DecorationSettings } from './settings'
 
-describe('resolveDecorationSettings', () => {
-  it('applies defaults when not set', () =>
-    assert.deepStrictEqual(resolveDecorationSettings({}), {
-      lineBackgroundColors: true,
-    } as DecorationSettings))
+describe('Settings', () => {
+  describe('decorations', () => {
+    it('applies defaults when not set', () =>
+      assert.deepStrictEqual(resolveSettings({}).decorations, {
+        lineBackgroundColors: true,
+      } as DecorationSettings))
 
-  it('respects the hide property', () =>
-    assert.deepStrictEqual(
-      resolveDecorationSettings({
-        decorations: {
+    it('respects the hide property', () =>
+      assert.deepStrictEqual(
+        resolveSettings({
+          decorations: {
+            hide: true,
+            lineBackgroundColors: true,
+            lineHitCounts: true,
+          },
+        }).decorations,
+        {
           hide: true,
-          lineBackgroundColors: true,
-          lineHitCounts: true,
-        },
-      }),
-      {
-        hide: true,
-      } as DecorationSettings
-    ))
+        } as DecorationSettings
+      ))
 
-  it('respects the other properties', () =>
-    assert.deepStrictEqual(
-      resolveDecorationSettings({
-        decorations: {
+    it('respects the other properties', () =>
+      assert.deepStrictEqual(
+        resolveSettings({
+          decorations: {
+            lineBackgroundColors: false,
+            lineHitCounts: true,
+          },
+        }).decorations,
+        {
           lineBackgroundColors: false,
           lineHitCounts: true,
-        },
-      }),
-      {
-        lineBackgroundColors: false,
-        lineHitCounts: true,
-      } as DecorationSettings
-    ))
+        } as DecorationSettings
+      ))
 
-  it('applies defaults for the other properties', () =>
-    assert.deepStrictEqual(
-      resolveDecorationSettings({
-        decorations: {},
-      }),
-      {
-        lineBackgroundColors: true,
-        lineHitCounts: false,
-      } as DecorationSettings
-    ))
+    it('applies defaults for the other properties', () =>
+      assert.deepStrictEqual(
+        resolveSettings({
+          decorations: {},
+        }).decorations,
+        {
+          lineBackgroundColors: true,
+          lineHitCounts: false,
+        } as DecorationSettings
+      ))
+  })
 })

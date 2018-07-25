@@ -1,4 +1,4 @@
-import { GetCommitCoverageDataArgs } from './api'
+import { CodecovGetCommitCoverageArgs } from './api'
 
 /**
  * A resolved URI identifies a path in a repository at a specific revision.
@@ -38,10 +38,14 @@ export function resolveURI(
   )
 }
 
-/** Returns the URL parameters used to access the Codecov API for the URI's repository. */
+/**
+ * Returns the URL parameters used to access the Codecov API for the URI's repository.
+ *
+ * Currently only GitHub.com repositories are supported.
+ */
 export function codecovParamsForRepositoryCommit(
   uri: Pick<ResolvedURI, 'repo' | 'rev'>
-): Pick<GetCommitCoverageDataArgs, 'service' | 'owner' | 'repo' | 'sha'> {
+): Pick<CodecovGetCommitCoverageArgs, 'service' | 'owner' | 'repo' | 'sha'> {
   // TODO: Support services (code hosts) other than GitHub.com, such as GitHub Enterprise, GitLab, etc.
   if (uri.repo.startsWith('github.com/')) {
     const parts = uri.repo.split('/', 4)

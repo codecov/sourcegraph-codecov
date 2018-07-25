@@ -22,7 +22,7 @@ import { TextDocuments } from '../../cxp-js/module/server/features/textDocumentS
 import { isEqual } from '../../cxp-js/module/util'
 import { TextDocument } from 'vscode-languageserver-types/lib/umd/main'
 import { iconURL } from './icon'
-import { ExtensionSettings, resolveDecorationSettings } from './settings'
+import { Settings, resolveSettings } from './settings'
 import { Model } from './model'
 import { codecovToDecorations } from './decoration'
 import { hsla, GREEN_HUE, RED_HUE } from './colors'
@@ -37,7 +37,7 @@ const HELP_COMMAND_ID = 'codecov.help'
 export function run(connection: Connection): void {
   let initialized = false
   let root: Pick<ResolvedURI, 'repo' | 'rev'> | null = null
-  let settings: ExtensionSettings | undefined
+  let settings: Settings | undefined
   let lastOpenedTextDocument: TextDocument | undefined
 
   // Track the currently open document.
@@ -82,7 +82,7 @@ export function run(connection: Connection): void {
 
   connection.onDidChangeConfiguration(
     async (params: DidChangeConfigurationParams) => {
-      const newSettings: ExtensionSettings = params.settings.merged // merged is (global + org + user) settings
+      const newSettings: Settings = resolveSettings(params.settings.merged) // merged is (global + org + user) settings
       if (isEqual(settings, newSettings)) {
         return // nothing to do
       }
@@ -115,7 +115,7 @@ export function run(connection: Connection): void {
 
   connection.onExecuteCommand((params: ExecuteCommandParams) => {
     const executeConfigurationCommand = (
-      newSettings: ExtensionSettings,
+      newSettings: Settings,
       configParams: ConfigurationUpdateParams
     ) => {
       // Run async to avoid blocking our response (and leading to a deadlock).
@@ -150,9 +150,8 @@ export function run(connection: Connection): void {
             })
             break
           case TOGGLE_HITS_DECORATIONS_COMMAND_ID:
-            settings.decorations.lineHitCounts = !resolveDecorationSettings(
-              settings
-            ).lineHitCounts
+            settings.decorations.lineHitCounts = !settings.decorations
+              .lineHitCounts
             executeConfigurationCommand(settings, {
               path: ['decorations', 'lineHitCounts'],
               value: settings.decorations.lineHitCounts,
@@ -167,34 +166,30 @@ export function run(connection: Connection): void {
   })
 
   let registeredContributions = false
-  async function registerContributions(
-    settings: ExtensionSettings
-  ): Promise<void> {
+  async function registerContributions(settings: Settings): Promise<void> {
     const contributions: Contributions = {
       commands: [],
       menus: { 'editor/title': [], commandPalette: [], help: [] },
     }
     if (lastOpenedTextDocument) {
-      const fileCoverage = await Model.getCoverageForFile({
-        token: settings.token,
-        ...resolveURI(root, lastOpenedTextDocument.uri),
-      })
+      const ratio = await Model.getFileCoverageRatio(
+        resolveURI(root, lastOpenedTextDocument.uri),
+        settings
+      )
       contributions.commands!.push({
         command: TOGGLE_ALL_DECORATIONS_COMMAND_ID,
         title: `${
-          resolveDecorationSettings(settings).hide ? 'Show' : 'Hide'
+          settings.decorations.hide ? 'Show' : 'Hide'
         } inline code coverage decorations on file`,
         category: 'Codecov',
         toolbarItem: {
-          label: fileCoverage.ratio
-            ? `Coverage: ${parseFloat(fileCoverage.ratio).toFixed(0)}%`
-            : 'Coverage',
+          label: ratio ? `Coverage: ${ratio.toFixed(0)}%` : 'Coverage',
           description: `Codecov: ${
             !settings.decorations || !settings.decorations.hide
               ? 'Hide'
               : 'Show'
           } code coverage`,
-          iconURL: fileCoverage.ratio && iconURL(iconColor(fileCoverage.ratio)),
+          iconURL: ratio !== undefined ? iconURL(iconColor(ratio)) : undefined,
           iconDescription:
             'Codecov logo with red, yellow, or green color indicating the file coverage ratio',
         },
@@ -263,7 +258,7 @@ export function run(connection: Connection): void {
   }
 
   async function publishDecorations(
-    settings: ExtensionSettings,
+    settings: Settings,
     documents: TextDocument[]
   ): Promise<void> {
     for (const { uri } of documents) {
@@ -279,26 +274,22 @@ export function run(connection: Connection): void {
 
   async function getDecorations(
     root: Pick<ResolvedURI, 'repo' | 'rev'> | null,
-    settings: ExtensionSettings,
+    settings: Settings,
     uri: string
   ): Promise<TextDocumentDecoration[]> {
-    const { hide, ...decorationSettings } = resolveDecorationSettings(settings)
+    const { hide, ...decorationSettings } = settings.decorations
     if (hide) {
       return []
     }
     return codecovToDecorations(
       decorationSettings,
-      await Model.getCoverageForFile({
-        token: settings.token,
-        ...resolveURI(root, uri),
-      })
+      await Model.getFileLineCoverage(resolveURI(root, uri), settings)
     )
   }
 }
 
-function iconColor(coverageRatio: string): string {
-  const r = parseFloat(coverageRatio)
-  return hsla(r * ((GREEN_HUE - RED_HUE) / 100), 0.25, 1)
+function iconColor(coverageRatio: number): string {
+  return hsla(coverageRatio * ((GREEN_HUE - RED_HUE) / 100), 0.25, 1)
 }
 
 const connection = createConnection(

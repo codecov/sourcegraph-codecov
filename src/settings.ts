@@ -1,16 +1,59 @@
-/** The user settings for this extension. */
-export interface ExtensionSettings {
+/**
+ * The resolved and normalized settings for this extension, the result of calling resolveSettings on a RawSettings
+ * value.
+ */
+export interface Settings {
   /** Settings specifying what to display on files. */
-  decorations?: DecorationSettings
-
-  /** The Codecov API token (required for private repositories). */
-  token?: string
+  decorations: DecorationSettings
 
   /**
-   * NOT YET SUPPORTED: URL(s) to Codecov Enterprise instances to contact for coverage data. If not specified,
-   * https://codecov.io is used.
+   * The list of Codecov endpoints that are contacted to retrieve coverage data, in order.
+   *
+   * If empty or not set, https://codecov.io is used.
    */
-  endpoints?: string[]
+  endpoints: Endpoint[]
+}
+
+/** The raw settings for this extension. Most callers should use Settings instead. */
+export interface RawSettings {
+  decorations?: Settings['decorations']
+  endpoints?: Settings['endpoints']
+}
+
+/** Returns a copy of the extension settings with values normalized and defaults applied. */
+export function resolveSettings(raw: RawSettings): Settings {
+  return {
+    decorations: resolveDecorations(raw),
+    endpoints: resolveEndpoints(raw),
+  }
+}
+
+/** A Codecov endpoint (either https://codecov.io or Codecov Enterprise). */
+export interface Endpoint {
+  /**
+   * The URL for this endpoint.
+   * @example https://codecov.io (Codecov.io)
+   * @example https://codecov.example.com (Codecov Enterprise)
+   */
+  url: string
+
+  /** The Codecov API token for this endpoint (required for private repositories on Codecov.io). */
+  token?: string
+}
+
+function resolveEndpoints(raw: RawSettings): Endpoint[] {
+  if (!raw.endpoints || raw.endpoints.length === 0) {
+    return [{ url: 'https://codecov.io' }]
+  }
+  return raw.endpoints.map(({ url, token }) => ({
+    url: urlWithOnlyProtocolAndHost(url),
+    token,
+  }))
+}
+
+function urlWithOnlyProtocolAndHost(urlStr: string): string {
+  const url = new URL(urlStr)
+  return `${url.protocol}//${url.host}`
 }
 
 /**
@@ -28,18 +71,15 @@ export interface DecorationSettings {
   lineHitCounts?: boolean
 }
 
-/** Applies defaults and normalizes the user settings. */
-export function resolveDecorationSettings(
-  settings: ExtensionSettings
-): DecorationSettings {
-  if (!settings.decorations) {
+function resolveDecorations(raw: RawSettings): DecorationSettings {
+  if (!raw.decorations) {
     return { lineBackgroundColors: true }
   }
-  if (settings.decorations.hide) {
+  if (raw.decorations.hide) {
     return { hide: true }
   }
   return {
-    lineBackgroundColors: settings.decorations.lineBackgroundColors !== false, // default true
-    lineHitCounts: !!settings.decorations.lineHitCounts, // default false
+    lineBackgroundColors: raw.decorations.lineBackgroundColors !== false, // default true
+    lineHitCounts: !!raw.decorations.lineHitCounts, // default false
   }
 }

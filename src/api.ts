@@ -1,51 +1,5 @@
-import { ResolvedURI } from './uri'
-
-/** The response data from the Codecov API for a commit. */
-export interface CodecovCommitData {
-  commit: {
-    commitid: string
-    report: {
-      files: {
-        [path: string]: {
-          /** Line coverage data for this file at this commit.. */
-          l: {
-            /**
-             * The coverage for the line (1-indexed).
-             * @type {number} number of hits on a fully covered line
-             * @type {string} "(partial hits)/branches" on a partially covered line
-             * @type {null} skipped line
-             */
-            [line: number]: number | string | null
-          }
-
-          /** Totals for this file at this commit. */
-          t: {
-            /** The coverage ratio for this file, as a string (e.g., "62.5000000"). */
-            c: string
-          }
-        }
-      }
-    }
-    totals: {
-      /** The coverage ratio of the repository at this commit. */
-      coverage: number
-    }
-  }
-  owner: {
-    /** An identifier for the code host or other service where the repository lives. */
-    service: 'github' | string
-
-    /** For GitHub, the name of the repository's owner. */
-    username: string
-  }
-  repo: {
-    /** The repository name (without the owner). */
-    name: string
-  }
-}
-
-/** The arguments for getCommitCoverageData. */
-export interface GetCommitCoverageDataArgs {
+/** The arguments for getCommitCoverage. */
+export interface CodecovGetCommitCoverageArgs {
   /**
    * The base URL of the Codecov instance.
    * @example https://codecov.io
@@ -68,20 +22,64 @@ export interface GetCommitCoverageDataArgs {
   token?: string
 }
 
+/** The response data from the Codecov API for a commit. */
+export interface CodecovCommitData {
+  commit: {
+    commitid: string
+    report: {
+      files: {
+        [path: string]:
+          | undefined
+          | {
+              /** Line coverage data for this file at this commit.. */
+              l: {
+                /**
+                 * The coverage for the line (1-indexed).
+                 * @type {number} number of hits on a fully covered line
+                 * @type {string} "(partial hits)/branches" on a partially covered line
+                 * @type {null} skipped line
+                 */
+                [line: number]: number | string | null | undefined
+              }
+
+              /** Totals for this file at this commit. */
+              t: {
+                /** The coverage ratio for this file, as a string (e.g., "62.5000000"). */
+                c: string
+              }
+            }
+      }
+    }
+    totals: {
+      /** The coverage ratio of the repository at this commit. */
+      coverage: number
+    }
+  }
+  owner: {
+    /** An identifier for the code host or other service where the repository lives. */
+    service: 'github' | string
+
+    /** For GitHub, the name of the repository's owner. */
+    username: string
+  }
+  repo: {
+    /** The repository name (without the owner). */
+    name: string
+  }
+}
+
 /**
  * Gets the Codecov coverage data for a single commit of a repository.
  *
  * See https://docs.codecov.io/v5.0.0/reference#section-get-a-single-commit.
  */
-export const getCommitCoverageData = memoizeAsync(
-  async (args: GetCommitCoverageDataArgs): Promise<any> =>
-    (await fetch(commitCoverageDataURL(args), {
+export const codecovGetCommitCoverage = memoizeAsync(
+  async (args: CodecovGetCommitCoverageArgs): Promise<CodecovCommitData> =>
+    (await fetch(commitCoverageURL(args), {
       method: 'GET',
       mode: 'cors',
-      credentials: 'omit',
-      headers: { 'X-Requested-By': 'cx-codecov' },
     })).json(),
-  commitCoverageDataURL
+  commitCoverageURL
 )
 
 /**
@@ -89,16 +87,18 @@ export const getCommitCoverageData = memoizeAsync(
  *
  * See https://docs.codecov.io/v5.0.0/reference#section-get-a-single-commit.
  */
-function commitCoverageDataURL({
+function commitCoverageURL({
   baseURL,
   service,
   owner,
   repo,
   sha,
   token,
-}: GetCommitCoverageDataArgs): string {
+}: CodecovGetCommitCoverageArgs): string {
+  const tokenSuffix = token ? `&access_token=${encodeURIComponent(token)}` : ''
+
   // The ?src=extension is necessary to get the data for all files in the response.
-  return `${baseURL}/api/${service}/${owner}/${repo}/commits/${sha}?src=extension&access_token=${token}`
+  return `${baseURL}/api/${service}/${owner}/${repo}/commits/${sha}?src=extension${tokenSuffix}`
 }
 
 /**

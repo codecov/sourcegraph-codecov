@@ -1,16 +1,17 @@
-import { LineCoverage, FileCoverage } from './model'
+import { LineCoverage, FileLineCoverage } from './model'
 import { DecorationSettings } from './settings'
 import { TextDocumentDecoration } from '../../cxp-js/lib'
 import { hsla, RED_HUE, GREEN_HUE, YELLOW_HUE } from './colors'
 
 export function codecovToDecorations(
   settings: Pick<DecorationSettings, Exclude<keyof DecorationSettings, 'hide'>>,
-  { lines }: FileCoverage
+  data: FileLineCoverage
 ): TextDocumentDecoration[] {
-  if (!lines) {
+  if (!data) {
     return []
   }
-  return Object.keys(lines).map(line => {
+  const decorations: TextDocumentDecoration[] = []
+  for (const [line, coverage] of Object.entries(data)) {
     const decoration: TextDocumentDecoration = {
       range: {
         start: { line: parseInt(line) - 1, character: 0 },
@@ -19,18 +20,19 @@ export function codecovToDecorations(
       isWholeLine: true,
     }
     if (settings.lineBackgroundColors) {
-      decoration.backgroundColor = lineColor(lines[line], 0.7, 0.25)
+      decoration.backgroundColor = lineColor(coverage, 0.7, 0.25)
     }
     if (settings.lineHitCounts) {
       decoration.after = {
-        backgroundColor: lineColor(lines[line], 0.7, 1),
-        color: lineColor(lines[line], 0.25, 1),
-        ...lineText(lines[line]),
+        backgroundColor: lineColor(coverage, 0.7, 1),
+        color: lineColor(coverage, 0.25, 1),
+        ...lineText(coverage),
         linkURL: 'http://example.com', // TODO!(sqs)
       }
     }
-    return decoration
-  })
+    decorations.push(decoration)
+  }
+  return decorations
 }
 
 function lineColor(
