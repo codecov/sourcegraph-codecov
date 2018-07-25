@@ -18,11 +18,13 @@ import { Connection, createConnection } from 'cxp/module/server/server'
 import { TextDocuments } from 'cxp/module/server/features/textDocumentSync'
 import { isEqual } from 'cxp/module/util'
 import { TextDocument } from 'vscode-languageserver-types'
+import { iconURL } from './icon'
 
 const TOGGLE_ALL_DECORATIONS_COMMAND_ID = 'codecov.decorations.toggleAll'
 const TOGGLE_HITS_DECORATIONS_COMMAND_ID = 'codecov.decorations.hits.toggle'
 const VIEW_COVERAGE_DETAILS_COMMAND_ID = 'codecov.viewCoverageDetails'
 const SET_API_TOKEN_COMMAND_ID = 'codecov.setAPIToken'
+const HELP_COMMAND_ID = 'codecov.help'
 
 /** The user settings for this extension. */
 interface ExtensionSettings {
@@ -82,9 +84,15 @@ export function run(connection: Connection): void {
   let settings: ExtensionSettings | undefined
   let lastOpenedTextDocument: TextDocument | undefined
 
+  // Track the currently open document.
   const textDocuments = new TextDocuments()
   textDocuments.listen(connection)
   textDocuments.onDidOpen(({ document }) => (lastOpenedTextDocument = document))
+  textDocuments.onDidClose(({ document }) => {
+    if (lastOpenedTextDocument && lastOpenedTextDocument.uri === document.uri) {
+      lastOpenedTextDocument = undefined
+    }
+  })
 
   connection.onInitialize(
     (params: InitializeParams & { originalRootUri?: string }) => {
@@ -135,6 +143,17 @@ export function run(connection: Connection): void {
     if (settings) {
       await registerContributions(settings)
       await publishDecorations(settings, [document])
+    }
+  })
+  textDocuments.onDidClose(async ({ document }) => {
+    if (settings) {
+      // TODO!(sqs): wait to clear to avoid jitter, but we do need to eventually clear to avoid
+      // showing this on non-files (such as dirs), until we get true 'when' support.
+      setTimeout(() => {
+        if (!lastOpenedTextDocument) {
+          registerContributions(settings!)
+        }
+      }, 500)
     }
   })
 
@@ -197,7 +216,7 @@ export function run(connection: Connection): void {
   ): Promise<void> {
     const contributions: Contributions = {
       commands: [],
-      menus: { 'editor/title': [], commandPalette: [] },
+      menus: { 'editor/title': [], commandPalette: [], help: [] },
     }
     if (lastOpenedTextDocument) {
       const fileCoverage = await getCoverageForFile({
@@ -206,17 +225,29 @@ export function run(connection: Connection): void {
       })
       contributions.commands!.push({
         command: TOGGLE_ALL_DECORATIONS_COMMAND_ID,
-        title: fileCoverage.ratio
-          ? `Coverage: ${parseFloat(fileCoverage.ratio).toFixed(0)}%`
-          : 'Coverage',
-        detail: `Codecov: ${
-          !settings.decorations || !settings.decorations.hide ? 'Hide' : 'Show'
-        } code coverage`,
+        title: `${
+          resolveDecorationSettings(settings).hide ? 'Show' : 'Hide'
+        } inline code coverage decorations on file`,
+        category: 'Codecov',
+        toolbarItem: {
+          label: fileCoverage.ratio
+            ? `Coverage: ${parseFloat(fileCoverage.ratio).toFixed(0)}%`
+            : 'Coverage',
+          description: `Codecov: ${
+            !settings.decorations || !settings.decorations.hide
+              ? 'Hide'
+              : 'Show'
+          } code coverage`,
+          iconURL: fileCoverage.ratio && iconURL(iconColor(fileCoverage.ratio)),
+          iconDescription:
+            'Codecov logo with red, yellow, or green color indicating the file coverage ratio',
+        },
       })
       const menuItem: MenuItemContribution = {
         command: TOGGLE_ALL_DECORATIONS_COMMAND_ID,
       }
       contributions.menus!['editor/title']!.push(menuItem)
+      contributions.menus!['commandPalette']!.push(menuItem)
     }
 
     // Always add global commands.
@@ -227,21 +258,24 @@ export function run(connection: Connection): void {
       {
         command: {
           command: TOGGLE_HITS_DECORATIONS_COMMAND_ID,
-          title: 'Codecov: Toggle line hit/branch counts',
+          title: 'Toggle line hit/branch counts',
+          category: 'Codecov',
         },
         menuItem: { command: TOGGLE_HITS_DECORATIONS_COMMAND_ID },
       },
       {
         command: {
           command: VIEW_COVERAGE_DETAILS_COMMAND_ID,
-          title: 'Codecov: View coverage details',
+          title: 'View coverage details',
+          category: 'Codecov',
         },
         menuItem: { command: VIEW_COVERAGE_DETAILS_COMMAND_ID },
       },
       {
         command: {
           command: SET_API_TOKEN_COMMAND_ID,
-          title: 'Codecov: Set API token for private repositories...',
+          title: 'Set API token for private repositories...',
+          category: 'Codecov',
         },
         menuItem: { command: SET_API_TOKEN_COMMAND_ID },
       },
@@ -250,6 +284,14 @@ export function run(connection: Connection): void {
       contributions.commands!.push(command)
       contributions.menus!['commandPalette']!.push(menuItem)
     }
+
+    contributions.commands!.push({
+      command: HELP_COMMAND_ID,
+      title: 'Documentation and support',
+      category: 'Codecov',
+      iconURL: iconURL(),
+    })
+    contributions.menus!['help']!.push({ command: HELP_COMMAND_ID })
 
     await connection.sendRequest(RegistrationRequest.type, {
       registrations: [
@@ -369,6 +411,11 @@ function codecovToDecorations(
   })
 }
 
+function iconColor(coverageRatio: string): string {
+  const r = parseFloat(coverageRatio)
+  return hsla(r * ((GREEN_HUE - RED_HUE) / 100), 0.25, 1)
+}
+
 function lineColor(
   coverage: LineCoverage,
   lightness: number,
@@ -385,6 +432,10 @@ function lineColor(
   } else {
     hue = YELLOW_HUE // partially covered
   }
+  return hsla(hue, lightness, alpha)
+}
+
+function hsla(hue: number, lightness: number, alpha: number): string {
   return `hsla(${hue}, 100%, ${lightness * 100}%, ${alpha})`
 }
 
