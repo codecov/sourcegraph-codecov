@@ -49,7 +49,7 @@ export class Model {
 function codecovParamsForEndpoint(
   settings: Settings
 ): Pick<CodecovGetCommitCoverageArgs, 'baseURL' | 'token'> {
-  const endpoint = settings.endpoints[0]
+  const endpoint = settings['codecov.endpoints'][0]
   return { baseURL: endpoint.url, token: endpoint.token }
 }
 

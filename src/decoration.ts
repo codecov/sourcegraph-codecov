@@ -12,6 +12,9 @@ export function codecovToDecorations(
   }
   const decorations: TextDocumentDecoration[] = []
   for (const [line, coverage] of Object.entries(data)) {
+    if (coverage === null) {
+      continue
+    }
     const decoration: TextDocumentDecoration = {
       range: {
         start: { line: parseInt(line) - 1, character: 0 },
@@ -57,6 +60,9 @@ function lineColor(
 function lineText(
   coverage: LineCoverage
 ): { contentText?: string; hoverMessage?: string } {
+  if (coverage === null) {
+    return {}
+  }
   if (typeof coverage === 'number') {
     if (coverage >= 1) {
       return {

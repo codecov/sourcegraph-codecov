@@ -4,7 +4,7 @@ import { resolveSettings, DecorationSettings } from './settings'
 describe('Settings', () => {
   describe('decorations', () => {
     it('applies defaults when not set', () =>
-      assert.deepStrictEqual(resolveSettings({}).decorations, {
+      assert.deepStrictEqual(resolveSettings({})['codecov.decorations'], {
         lineBackgroundColors: true,
       } as DecorationSettings))
 
@@ -16,7 +16,7 @@ describe('Settings', () => {
             lineBackgroundColors: true,
             lineHitCounts: true,
           },
-        }).decorations,
+        })['codecov.decorations'],
         {
           hide: true,
         } as DecorationSettings
@@ -29,7 +29,7 @@ describe('Settings', () => {
             lineBackgroundColors: false,
             lineHitCounts: true,
           },
-        }).decorations,
+        })['codecov.decorations'],
         {
           lineBackgroundColors: false,
           lineHitCounts: true,
@@ -40,7 +40,7 @@ describe('Settings', () => {
       assert.deepStrictEqual(
         resolveSettings({
           decorations: {},
-        }).decorations,
+        })['codecov.decorations'],
         {
           lineBackgroundColors: true,
           lineHitCounts: false,
