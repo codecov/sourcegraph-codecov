@@ -1,6 +1,6 @@
 import { LineCoverage, FileLineCoverage } from './model'
 import { DecorationSettings } from './settings'
-import { TextDocumentDecoration } from '../../cxp-js/lib'
+import { TextDocumentDecoration } from 'cxp'
 import { hsla, RED_HUE, GREEN_HUE, YELLOW_HUE } from './colors'
 
 export function codecovToDecorations(

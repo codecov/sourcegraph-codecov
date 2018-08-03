@@ -1,8 +1,8 @@
-import { createWebWorkerMessageTransports } from '../../cxp-js/module/jsonrpc2/transports/webWorker'
+import { createWebWorkerMessageTransports } from 'cxp/module/jsonrpc2/transports/webWorker'
 import {
     InitializeResult,
     InitializeParams,
-} from '../../cxp-js/module/protocol'
+} from 'cxp/module/protocol'
 import {
     TextDocumentDecoration,
     ExecuteCommandParams,
@@ -16,10 +16,10 @@ import {
     RegistrationParams,
     TextDocumentPublishDecorationsNotification,
     TextDocumentPublishDecorationsParams,
-} from '../../cxp-js/lib'
-import { Connection, createConnection } from '../../cxp-js/module/server/server'
-import { TextDocuments } from '../../cxp-js/module/server/features/textDocumentSync'
-import { isEqual } from '../../cxp-js/module/util'
+} from 'cxp/lib'
+import { Connection, createConnection } from 'cxp/module/server/server'
+import { TextDocuments } from 'cxp/module/server/features/textDocumentSync'
+import { isEqual } from 'cxp/module/util'
 import { TextDocument } from 'vscode-languageserver-types/lib/umd/main'
 import { iconURL } from './icon'
 import { Settings, resolveSettings } from './settings'
