@@ -54,7 +54,7 @@
     "typescript": "^2.9.2"
   },
   "dependencies": {
-    "cxp": "^6.2.0",
+    "cxp": "^6.3.0",
     "vscode-languageserver-types": "^3.9.0"
   },
   "sideEffects": false
