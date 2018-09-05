@@ -1,8 +1,8 @@
-import { createWebWorkerMessageTransports } from '@sourcegraph/sourcegraph.proposed/module/jsonrpc2/transports/webWorker'
+import { createWebWorkerMessageTransports } from 'sourcegraph/module/jsonrpc2/transports/webWorker'
 import {
     SourcegraphExtensionAPI,
     activateExtension,
-} from '@sourcegraph/sourcegraph.proposed/module/extension'
+} from 'sourcegraph/module/extension'
 import { Settings, resolveSettings, resolveEndpoint } from './settings'
 import { combineLatest, from } from 'rxjs'
 import {

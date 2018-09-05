@@ -1,6 +1,6 @@
 import { LineCoverage, FileLineCoverage } from './model'
 import { Settings } from './settings'
-import { TextDocumentDecoration } from '@sourcegraph/sourcegraph.proposed/module/protocol'
+import { TextDocumentDecoration } from 'sourcegraph/module/protocol'
 import { hsla, RED_HUE, GREEN_HUE, YELLOW_HUE } from './colors'
 
 export function codecovToDecorations(

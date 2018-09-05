@@ -249,7 +249,7 @@
     "typescript": "^3.0.3"
   },
   "dependencies": {
-    "@sourcegraph/sourcegraph.proposed": "^12.0.1",
-    "rxjs": "^6.3.2"
+    "rxjs": "^6.3.2",
+    "sourcegraph": "^13.0.0"
   }
 }
