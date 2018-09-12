@@ -15,6 +15,7 @@
   "activationEvents": [
     "*"
   ],
+  "__exportsActivate": true,
   "contributes": {
     "actions": [
       {
@@ -243,13 +244,11 @@
     "parcel-bundler": "^1.9.7",
     "prettier": "^1.13.7",
     "source-map-support": "^0.5.6",
-    "sourcegraph": "^14.1.1",
+    "sourcegraph": "^16.0.0",
     "ts-node": "^7.0.0",
     "tslint": "^5.10.0",
     "tslint-language-service": "^0.9.9",
     "typescript": "^3.0.3"
   },
-  "dependencies": {
-    "rxjs": "^6.3.2"
-  }
+  "dependencies": {}
 }

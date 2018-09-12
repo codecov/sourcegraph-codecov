@@ -1,7 +1,7 @@
 import { LineCoverage, FileLineCoverage } from './model'
 import { Settings } from './settings'
-import { TextDocumentDecoration } from 'sourcegraph/module/protocol'
 import { hsla, RED_HUE, GREEN_HUE, YELLOW_HUE } from './colors'
+import { TextDocumentDecoration, Range } from 'sourcegraph'
 
 export function codecovToDecorations(
     settings: Pick<
@@ -14,15 +14,13 @@ export function codecovToDecorations(
         return []
     }
     const decorations: TextDocumentDecoration[] = []
-    for (const [line, coverage] of Object.entries(data)) {
+    for (const [lineStr, coverage] of Object.entries(data)) {
         if (coverage === null) {
             continue
         }
+        const line = parseInt(lineStr) - 1 // 0-indexed line
         const decoration: TextDocumentDecoration = {
-            range: {
-                start: { line: parseInt(line) - 1, character: 0 },
-                end: { line: parseInt(line) - 1, character: 1 },
-            },
+            range: new Range(line, 0, line, 0),
             isWholeLine: true,
         }
         if (settings['codecov.decorations.lineCoverage']) {

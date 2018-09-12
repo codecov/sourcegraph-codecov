@@ -1,7 +1,5 @@
-import { createWebWorkerMessageTransports } from 'sourcegraph/module/jsonrpc2/transports/webWorker'
-import { SourcegraphExtensionAPI, activateExtension } from 'sourcegraph'
 import { Settings, resolveSettings, resolveEndpoint } from './settings'
-import { combineLatest, from, ObservableInput } from 'rxjs'
+import * as sourcegraph from 'sourcegraph'
 import {
     getFileCoverageRatios,
     getCommitCoverageRatio,
@@ -9,59 +7,59 @@ import {
 } from './model'
 import { codecovToDecorations } from './decoration'
 import { resolveURI, codecovParamsForRepositoryCommit } from './uri'
-import { Window } from 'sourcegraph/lib/extension/api'
 
 /** Entrypoint for the Codecov Sourcegraph extension. */
-export function run(sourcegraph: SourcegraphExtensionAPI<Settings>): void {
+export function activate(): void {
+    function activeEditor(): sourcegraph.CodeEditor | undefined {
+        return sourcegraph.app.activeWindow
+            ? sourcegraph.app.activeWindow.visibleViewComponents[0]
+            : undefined
+    }
+
     // When the configuration or current file changes, publish new decorations.
     //
     // TODO: Unpublish decorations on previously (but not currently) open files when settings changes, to avoid a
     // brief flicker of the old state when the file is reopened.
-    combineLatest(
-        from(sourcegraph.configuration as ObservableInput<Settings>),
-        from(sourcegraph.windows as ObservableInput<Window[]>)
-    ).subscribe(async ([configuration, windows]) => {
-        for (const window of windows) {
-            // Publish the latest decorations for the file that's being displayed in the window, if any.
-            if (window.activeComponent && window.activeComponent.resource) {
-                const settings = resolveSettings(configuration)
-                const uri = window.activeComponent.resource
-                sourcegraph.windows.setDecorations(
-                    { uri },
-                    codecovToDecorations(
-                        settings,
-                        await getFileLineCoverage(
-                            resolveURI(uri),
-                            settings['codecov.endpoints'][0]
-                        )
-                    )
-                )
-            }
+    async function decorate(
+        editor: sourcegraph.CodeEditor | undefined = activeEditor()
+    ): Promise<void> {
+        if (!editor) {
+            return
         }
-    })
+        const settings = resolveSettings(
+            sourcegraph.configuration.get<Settings>().value
+        )
+        try {
+            const decorations = await getFileLineCoverage(
+                resolveURI(editor.document.uri),
+                settings['codecov.endpoints'][0]
+            )
+            editor.setDecorations(
+                null,
+                codecovToDecorations(settings, decorations)
+            )
+        } catch (err) {
+            console.error('Decoration error:', err)
+        }
+    }
+    sourcegraph.configuration.subscribe(() => decorate())
+    // TODO(sqs): Add a way to get notified when a new editor is opened (because we want to be able to pass an `editor` to `updateDecorations`/`updateContext`, but this subscription just gives us a `doc`).
+    sourcegraph.workspace.onDidOpenTextDocument.subscribe(() => decorate())
 
     // Set context values referenced in template expressions in the extension manifest (e.g., to interpolate "N" in
     // the "Coverage: N%" button label).
     //
     // The context only needs to be updated when the endpoints configuration changes.
-    combineLatest(
-        from(sourcegraph.configuration.watch(
-            'codecov.endpoints'
-        ) as ObservableInput<Settings>),
-        from(sourcegraph.windows as ObservableInput<Window[]>)
-    ).subscribe(async ([configuration, windows]) => {
-        if (
-            !sourcegraph.activeWindow ||
-            !sourcegraph.activeWindow.activeComponent ||
-            !sourcegraph.activeWindow.activeComponent.resource
-        ) {
+    async function updateContext(
+        editor: sourcegraph.CodeEditor | undefined = activeEditor()
+    ): Promise<void> {
+        if (!editor) {
             return
         }
-        const lastURI = resolveURI(
-            sourcegraph.activeWindow.activeComponent.resource
+        const lastURI = resolveURI(editor.document.uri)
+        const endpoint = resolveEndpoint(
+            sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
         )
-
-        const endpoint = resolveEndpoint(configuration['codecov.endpoints'])
 
         const context: {
             [key: string]: string | number | boolean | null
@@ -95,31 +93,27 @@ export function run(sourcegraph: SourcegraphExtensionAPI<Settings>): void {
         } catch (err) {
             console.error(`Error loading Codecov file coverage: ${err}`)
         }
-        sourcegraph.context.updateContext(context)
-    })
+        sourcegraph.internal.updateContext(context)
+    }
+    sourcegraph.configuration.subscribe(() => updateContext())
+    sourcegraph.workspace.onDidOpenTextDocument.subscribe(() => updateContext())
 
     // Handle the "Set Codecov API token" command (show the user a prompt for their token, and save
     // their input to settings).
-    sourcegraph.commands.register('codecov.setAPIToken', async () => {
+    sourcegraph.commands.registerCommand('codecov.setAPIToken', async () => {
         const endpoint = resolveEndpoint(
-            sourcegraph.configuration.get('codecov.endpoints')
+            sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
         )
-        const token = await sourcegraph.windows.showInputBox(
-            `Codecov API token (for ${endpoint.url}):`,
-            endpoint.token || ''
-        )
-        if (token !== null) {
+        const token = await sourcegraph.app.activeWindow!.showInputBox({
+            prompt: `Codecov API token (for ${endpoint.url}):`,
+            value: endpoint.token || '',
+        })
+        if (token !== undefined) {
             // TODO: Only supports setting the token of the first API endpoint.
             endpoint.token = token || undefined
-            return sourcegraph.configuration.update('codecov.endpoints', [
-                endpoint,
-            ])
+            return sourcegraph.configuration
+                .get<Settings>()
+                .update('codecov.endpoints', [endpoint])
         }
     })
 }
-
-// This runs in a Web Worker and communicates using postMessage with the page.
-activateExtension<Settings>(
-    createWebWorkerMessageTransports(self as DedicatedWorkerGlobalScope),
-    run
-)
