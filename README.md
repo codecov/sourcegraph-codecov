@@ -1,4 +1,4 @@
-# Codecov Sourcegraph extension
+# Codecov Sourcegraph Extension
 
 A [Sourcegraph extension](https://github.com/sourcegraph/sourcegraph-extension-api) for showing code coverage information from [Codecov](https://codecov.io) on GitHub, Sourcegraph, and other tools.
 
@@ -18,7 +18,7 @@ A [Sourcegraph extension](https://github.com/sourcegraph/sourcegraph-extension-a
 
 ## Usage
 
-### On GitHub using the Chrome extension
+### On GitHub Using the Chrome Extension
 
 1. Install [Sourcegraph for Chrome](https://chrome.google.com/webstore/detail/sourcegraph/dgjhfomjieaadpoljlnidmbgkdffpack) or [Sourcegraph for Firefox](https://addons.mozilla.org/en-US/firefox/addon/sourcegraph/)
 2. Open the Sourcegraph for Chrome/Firefox extension options page (by clicking the Sourcegraph icon in the browser toolbar)
@@ -28,7 +28,7 @@ A [Sourcegraph extension](https://github.com/sourcegraph/sourcegraph-extension-a
 
 ![Screenshot](https://user-images.githubusercontent.com/1976/45107396-53d56880-b0ee-11e8-96e9-ca83e991101c.png)
 
-#### With private GitHub.com repositories
+#### With Private GitHub.com Repositories
 
 You can use the Codecov extension for private repositories on GitHub.com. This does not require signup for Sourcegraph, and your code is never sent to Sourcegraph.
 
