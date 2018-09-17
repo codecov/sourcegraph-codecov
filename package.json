@@ -142,7 +142,8 @@
           "when": "resource && codecov.repoURL"
         },
         {
-          "action": "codecov.setAPIToken"
+          "action": "codecov.setAPIToken",
+          "when": "resource"
         },
         {
           "action": "codecov.help"
