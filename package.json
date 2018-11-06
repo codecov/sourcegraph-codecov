@@ -212,7 +212,7 @@
     "prettier": "prettier '**/*.{js?(on),ts}' --write --list-different",
     "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
     "typecheck": "tsc -p tsconfig.json",
-    "build": "parcel build --experimental-scope-hoisting --out-file extension.js src/extension.ts",
+    "build": "parcel build --out-file extension.js src/extension.ts",
     "serve": "parcel serve --no-hmr --no-source-maps --out-file extension.js src/extension.ts",
     "test": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' mocha --require ts-node/register --require source-map-support/register --opts mocha.opts",
     "cover": "TS_NODE_COMPILER_OPTIONS='{\"module\":\"commonjs\"}' nyc --require ts-node/register --require source-map-support/register --all mocha --opts mocha.opts --timeout 10000",
