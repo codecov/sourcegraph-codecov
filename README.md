@@ -1,6 +1,6 @@
 # Codecov Sourcegraph Extension
 
-A [Sourcegraph extension](https://github.com/sourcegraph/sourcegraph-extension-api) for showing code coverage information from [Codecov](https://codecov.io) on GitHub, Sourcegraph, and other tools.
+A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing code coverage information from [Codecov](https://codecov.io) on GitHub, Sourcegraph, and other tools.
 
 [**🎥 Demo video**](https://www.youtube.com/watch?v=j1eWBa3rWH8)
 
