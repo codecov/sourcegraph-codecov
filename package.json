@@ -10,10 +10,6 @@
   },
   "version": "0.0.0-development",
   "license": "MIT",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/sourcegraph/sourcegraph-codecov.git"
-  },
   "bugs": {
     "url": "https://github.com/sourcegraph/sourcegraph-codecov/issues"
   },
