@@ -16,7 +16,6 @@
   "activationEvents": [
     "*"
   ],
-  "__exportsActivate": true,
   "contributes": {
     "actions": [
       {
