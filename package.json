@@ -135,15 +135,14 @@
         },
         {
           "action": "codecov.link.commit",
-          "when": "resource && codecov.commitURL"
+          "when": "codecov.commitURL"
         },
         {
           "action": "codecov.link.repository",
-          "when": "resource && codecov.repoURL"
+          "when": "codecov.repoURL"
         },
         {
-          "action": "codecov.setAPIToken",
-          "when": "resource"
+          "action": "codecov.setAPIToken"
         },
         {
           "action": "codecov.help"

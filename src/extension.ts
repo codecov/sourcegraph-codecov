@@ -99,7 +99,12 @@ export function activate(): void {
         const endpoint = resolveEndpoint(
             sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
         )
-        const token = await sourcegraph.app.activeWindow!.showInputBox({
+        if (!sourcegraph.app.activeWindow) {
+            throw new Error(
+                'To set a Codecov API token, navigate to a file and then re-run this command.'
+            )
+        }
+        const token = await sourcegraph.app.activeWindow.showInputBox({
             prompt: `Codecov API token (for ${endpoint.url}):`,
             value: endpoint.token || '',
         })
