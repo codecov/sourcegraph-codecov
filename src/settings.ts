@@ -37,7 +37,9 @@ const CODECOV_IO_URL = 'https://codecov.io'
  *
  * @todo support more than 1 endpoint
  */
-export function resolveEndpoint(endpoints?: Endpoint[]): Endpoint {
+export function resolveEndpoint(
+    endpoints?: Readonly<Endpoint[]>
+): Readonly<Endpoint> {
     if (!endpoints || endpoints.length === 0) {
         return { url: CODECOV_IO_URL }
     }

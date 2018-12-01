@@ -10,34 +10,31 @@ import { resolveURI, codecovParamsForRepositoryCommit } from './uri'
 
 /** Entrypoint for the Codecov Sourcegraph extension. */
 export function activate(): void {
-    function activeEditor(): sourcegraph.CodeEditor | undefined {
+    function activeEditors(): sourcegraph.CodeEditor[] {
         return sourcegraph.app.activeWindow
-            ? sourcegraph.app.activeWindow.visibleViewComponents[0]
-            : undefined
+            ? sourcegraph.app.activeWindow.visibleViewComponents
+            : []
     }
 
     // When the configuration or current file changes, publish new decorations.
     //
     // TODO: Unpublish decorations on previously (but not currently) open files when settings changes, to avoid a
     // brief flicker of the old state when the file is reopened.
-    async function decorate(
-        editor: sourcegraph.CodeEditor | undefined = activeEditor()
-    ): Promise<void> {
-        if (!editor) {
-            return
-        }
+    async function decorate(editors = activeEditors()): Promise<void> {
         const settings = resolveSettings(
             sourcegraph.configuration.get<Settings>().value
         )
         try {
-            const decorations = await getFileLineCoverage(
-                resolveURI(editor.document.uri),
-                settings['codecov.endpoints'][0]
-            )
-            editor.setDecorations(
-                null,
-                codecovToDecorations(settings, decorations)
-            )
+            for (const editor of editors) {
+                const decorations = await getFileLineCoverage(
+                    resolveURI(editor.document.uri),
+                    settings['codecov.endpoints'][0]
+                )
+                editor.setDecorations(
+                    null,
+                    codecovToDecorations(settings, decorations)
+                )
+            }
         } catch (err) {
             console.error('Decoration error:', err)
         }
@@ -50,13 +47,11 @@ export function activate(): void {
     // the "Coverage: N%" button label).
     //
     // The context only needs to be updated when the endpoints configuration changes.
-    async function updateContext(
-        editor: sourcegraph.CodeEditor | undefined = activeEditor()
-    ): Promise<void> {
-        if (!editor) {
+    async function updateContext(editors = activeEditors()): Promise<void> {
+        if (editors.length === 0) {
             return
         }
-        const lastURI = resolveURI(editor.document.uri)
+        const lastURI = resolveURI(editors[0].document.uri)
         const endpoint = resolveEndpoint(
             sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
         )
@@ -110,10 +105,11 @@ export function activate(): void {
         })
         if (token !== undefined) {
             // TODO: Only supports setting the token of the first API endpoint.
-            endpoint.token = token || undefined
             return sourcegraph.configuration
                 .get<Settings>()
-                .update('codecov.endpoints', [endpoint])
+                .update('codecov.endpoints', [
+                    { ...endpoint, token: token || undefined },
+                ])
         }
     })
 }
