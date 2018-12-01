@@ -48,10 +48,20 @@ export function activate(): void {
     //
     // The context only needs to be updated when the endpoints configuration changes.
     async function updateContext(editors = activeEditors()): Promise<void> {
-        if (editors.length === 0) {
+        // Get the current repository. Sourcegraph 3.0-preview exposes sourcegraph.workspace.roots, but earlier
+        // versions do not.
+        let uri: string
+        if (
+            sourcegraph.workspace.roots &&
+            sourcegraph.workspace.roots.length > 0
+        ) {
+            uri = sourcegraph.workspace.roots[0].uri.toString()
+        } else if (editors.length > 0) {
+            uri = editors[0].document.uri
+        } else {
             return
         }
-        const lastURI = resolveURI(editors[0].document.uri)
+        const lastURI = resolveURI(uri)
         const endpoint = resolveEndpoint(
             sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
         )
@@ -92,6 +102,9 @@ export function activate(): void {
     }
     sourcegraph.configuration.subscribe(() => updateContext())
     sourcegraph.workspace.onDidOpenTextDocument.subscribe(() => updateContext())
+    if (sourcegraph.workspace.onDidChangeRoots) {
+        sourcegraph.workspace.onDidChangeRoots.subscribe(() => updateContext())
+    }
 
     // Handle the "Set Codecov API token" command (show the user a prompt for their token, and save
     // their input to settings).
