@@ -4,7 +4,7 @@ A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing c
 
 [**🎥 Demo video**](https://www.youtube.com/watch?v=j1eWBa3rWH8)
 
-[**🗃️ Source code**](https://github.com/sourcegraph/sourcegraph-codecov)
+[**🗃️ Source code**](https://github.com/codecov/sourcegraph-codecov)
 
 [**➕ Add to Sourcegraph**](https://sourcegraph.com/extensions/sourcegraph/codecov) (enabled by default on Sourcegraph.com and in Sourcegraph for Chrome)
 
@@ -32,7 +32,7 @@ A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing c
 
 You can use the Codecov extension for private repositories on GitHub.com. Your code is never sent to Sourcegraph.
 
-1.  Follow the [Codecov extension usage instructions](https://github.com/sourcegraph/sourcegraph-codecov#usage) above to install Sourcegraph for Chrome/Firefox and enable the `Use Sourcegraph extensions` feature flag
+1.  Follow the [Codecov extension usage instructions](https://github.com/codecov/sourcegraph-codecov#usage) above to install Sourcegraph for Chrome/Firefox and enable the `Use Sourcegraph extensions` feature flag
 2.  Go to the command palette on GitHub (added by the Sourcegraph browser extension, see screenshot below) and choose "Codecov: Set API token for private repositories"
 3.  Enter your Codecov API token
 4.  Visit any file in a GitHub.com private repository that has Codecov coverage data

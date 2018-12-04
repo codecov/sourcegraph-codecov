@@ -6,12 +6,12 @@
   "icon": "https://user-images.githubusercontent.com/1387653/45938068-4daf0b00-bf7b-11e8-9c38-3619d61af834.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/sourcegraph/sourcegraph-codecov.git"
+    "url": "https://github.com/codecov/sourcegraph-codecov.git"
   },
   "version": "0.0.0-development",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/sourcegraph/sourcegraph-codecov/issues"
+    "url": "https://github.com/codecov/sourcegraph-codecov/issues"
   },
   "activationEvents": [
     "*"
