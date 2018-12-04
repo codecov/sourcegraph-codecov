@@ -20,7 +20,7 @@ A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing c
 
 ### On GitHub using the Chrome extension
 
-1.  Install [Sourcegraph for Chrome](https://chrome.google.com/webstore/detail/sourcegraph/dgjhfomjieaadpoljlnidmbgkdffpack) or [Sourcegraph for Firefox](https://addons.mozilla.org/en-US/firefox/addon/sourcegraph/)
+1.  Install [Sourcegraph for Chrome](https://chrome.google.com/webstore/detail/sourcegraph/dgjhfomjieaadpoljlnidmbgkdffpack) or [Sourcegraph for Firefox](https://docs.sourcegraph.com/integration/browser_extension)
 2.  Open the Sourcegraph for Chrome/Firefox extension options page (by clicking the Sourcegraph icon in the browser toolbar)
 3.  Check the box labeled **Use Sourcegraph extensions** (required while this feature is in alpha)
 4.  Visit [tuf_store.go in theupdateframework/notary on GitHub](https://github.com/theupdateframework/notary/blob/fb795b0bc868746ed2efa2cd7109346bc7ddf0a4/server/storage/tuf_store.go) (or any other file in a public repository that has Codecov code coverage)
