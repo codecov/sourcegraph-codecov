@@ -1,7 +1,7 @@
 {
-  "name": "codecov",
-  "publisher": "sourcegraph",
-  "title": "Codecov",
+  "name": "WIP-codecov-uri-fix",
+  "publisher": "bastard",
+  "title": "Codecov W.I.P",
   "description": "Shows code coverage from Codecov",
   "icon": "https://user-images.githubusercontent.com/1387653/45938068-4daf0b00-bf7b-11e8-9c38-3619d61af834.png",
   "repository": {
@@ -248,7 +248,7 @@
     "ts-node": "^7.0.0",
     "tslint": "^5.10.0",
     "tslint-language-service": "^0.9.9",
-    "typescript": "^3.0.3"
+    "typescript": "^3.2.2"
   },
   "dependencies": {}
 }

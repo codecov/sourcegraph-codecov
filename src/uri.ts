@@ -35,9 +35,22 @@ export function resolveURI(uri: string): ResolvedURI {
 export function codecovParamsForRepositoryCommit(
     uri: Pick<ResolvedURI, 'repo' | 'rev'>
 ): Pick<CodecovGetCommitCoverageArgs, 'service' | 'owner' | 'repo' | 'sha'> {
-    // TODO: Support services (code hosts) other than GitHub.com, such as GitHub Enterprise, GitLab, etc.
-    if (uri.repo.startsWith('github.com/')) {
-        const parts = uri.repo.split('/', 4)
+
+    const hosts: any[] = [
+        { name: 'github.com', alias: 'gh' },
+        { name: 'gitlab.com', alias: 'gl' },
+        { name: 'bitbucket.org', alias: 'bb' },
+    ];
+
+    const host: any = hosts.find((host: any) => {
+        if (uri.repo.includes(host.name)) {
+            return host;
+        }
+    });
+
+    if (host) {
+        const parts: string[] = uri.repo.split('/', 4);
+
         if (parts.length !== 3) {
             throw new Error(
                 `invalid GitHub.com repository: ${JSON.stringify(
@@ -45,8 +58,16 @@ export function codecovParamsForRepositoryCommit(
                 )} (expected "github.com/owner/repo")`
             )
         }
+
+        console.log('result', {
+            service: host.alias,
+            owner: parts[1],
+            repo: parts[2],
+            sha: uri.rev,
+        })
+
         return {
-            service: 'gh',
+            service: host.alias,
             owner: parts[1],
             repo: parts[2],
             sha: uri.rev,
