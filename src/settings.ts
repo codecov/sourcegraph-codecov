@@ -21,14 +21,16 @@ export function resolveSettings(raw: Partial<Settings>): Settings {
         ['codecov.decorations.lineHitCounts']: !!raw[
             'codecov.decorations.lineHitCounts'
         ],
-        ['codecov.endpoints']: [resolveEndpoint(raw['codecov.endpoints'])],
+        ['codecov.endpoints']: [resolveEndpoint(raw['codecov.endpoints'])]
     }
 }
 
 export interface Endpoint {
-    url: string
+    url?: string
     token?: string
+    service?: string
 }
+
 
 const CODECOV_IO_URL = 'https://codecov.io'
 
@@ -48,6 +50,7 @@ export function resolveEndpoint(
             ? urlWithOnlyProtocolAndHost(endpoints[0].url)
             : CODECOV_IO_URL,
         token: endpoints[0].token || undefined,
+        service: endpoints[0].service || undefined
     }
 }
 

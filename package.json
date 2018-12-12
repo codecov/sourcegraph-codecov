@@ -98,6 +98,12 @@
         "category": "Codecov"
       },
       {
+        "id": "codecov.setupEnterprise",
+        "command": "codecov.setupEnterprise",
+        "title": "Set up Codecov Enterprise",
+        "category": "Codecov"
+      },
+      {
         "id": "codecov.help",
         "command": "open",
         "commandArguments": [
@@ -143,6 +149,9 @@
         },
         {
           "action": "codecov.setAPIToken"
+        },
+        {
+          "action": "codecov.setupEnterprise"
         },
         {
           "action": "codecov.help"
@@ -193,6 +202,10 @@
               },
               "token": {
                 "description": "The Codecov API token for this endpoint (required for private repositories).",
+                "type": "string"
+              },
+              "type": {
+                "description": "Define hosted version control type (gh|ghe|bb|gl):",
                 "type": "string"
               }
             }
@@ -248,7 +261,7 @@
     "ts-node": "^7.0.0",
     "tslint": "^5.10.0",
     "tslint-language-service": "^0.9.9",
-    "typescript": "^3.0.3"
+    "typescript": "^3.2.2"
   },
   "dependencies": {}
 }
