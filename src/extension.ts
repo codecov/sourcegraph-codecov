@@ -1,4 +1,4 @@
-import { Settings, resolveSettings, resolveEndpoint } from './settings'
+import { Settings, resolveSettings, resolveEndpoint, Location } from './settings'
 import * as sourcegraph from 'sourcegraph'
 import {
     getFileCoverageRatios,
@@ -128,6 +128,42 @@ export function activate(): void {
                 .update('codecov.endpoints', [
                     { ...endpoint, token: token || undefined },
                 ])
+        }
+    })
+
+    sourcegraph.commands.registerCommand('codecov.setLocation', async () => {
+        const location: Location = sourcegraph.configuration.get<Settings>().get('codecov.location') || {}
+
+        if (!sourcegraph.app.activeWindow) {
+            throw new Error(
+                'To set a Codecov API location url, navigate to a file and then re-run this command.'
+            )
+        }
+
+        let url: any = await sourcegraph.app.activeWindow.showInputBox({
+            prompt: `Define hosted version control url (e.g: sourcecontrol.example.com):`,
+            value: location.url || '',
+        })
+
+        let service: any = await sourcegraph.app.activeWindow.showInputBox({
+            prompt: `Define hosted version control type (gh|gl|bb):`,
+            value: location.service || 'gh',
+        })
+
+        if (url !== undefined || service !== undefined) {
+
+            if (url.endsWith('/')) {
+                url = url.slice(0, -1);
+            }
+
+            // TODO: Only supports setting the token of the first API endpoint.
+            return sourcegraph.configuration
+                .get<Settings>()
+                .update('codecov.location',
+                    { ...location, url, service: service || 'gh' },
+                )
+        } else {
+            throw new Error('You did not insert a url or service')
         }
     })
 }

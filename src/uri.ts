@@ -1,4 +1,6 @@
+import * as sourcegraph from 'sourcegraph'
 import { CodecovGetCommitCoverageArgs } from './api'
+import { resolveEndpoint, Settings, Endpoint, Location } from './settings';
 
 /**
  * A resolved URI identifies a path in a repository at a specific revision.
@@ -36,11 +38,22 @@ export function codecovParamsForRepositoryCommit(
     uri: Pick<ResolvedURI, 'repo' | 'rev'>
 ): Pick<CodecovGetCommitCoverageArgs, 'service' | 'owner' | 'repo' | 'sha'> {
 
+
     const hosts: any[] = [
-        { name: 'github.com', alias: 'gh' },
-        { name: 'gitlab.com', alias: 'gl' },
-        { name: 'bitbucket.org', alias: 'bb' },
+        { name: 'github.com', service: 'gh' },
+        { name: 'gitlab.com', service: 'gl' },
+        { name: 'bitbucket.org', service: 'bb' },
     ];
+
+    const location: Location | undefined = sourcegraph.configuration.get<Settings>().get('codecov.location')
+
+    if (location && location.url && location.service) {
+        hosts.push({
+            name: location.url,
+            service: location.service
+        });
+    }
+
 
     const host: any = hosts.find((host: any) => {
         if (uri.repo.includes(host.name)) {
@@ -60,14 +73,14 @@ export function codecovParamsForRepositoryCommit(
         }
 
         console.log('result', {
-            service: host.alias,
+            service: host.service,
             owner: parts[1],
             repo: parts[2],
             sha: uri.rev,
         })
 
         return {
-            service: host.alias,
+            service: host.service,
             owner: parts[1],
             repo: parts[2],
             sha: uri.rev,

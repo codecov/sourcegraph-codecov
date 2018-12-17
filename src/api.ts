@@ -7,7 +7,7 @@ export interface CodecovGetCommitCoverageArgs {
     baseURL: string
 
     /** The identifier for the service where the repository lives. */
-    service: 'gh' | string
+    service: 'gh' | 'gl' | 'bb'
 
     /** The value for the :owner URL parameter (the repository's owner). */
     owner: string
@@ -57,7 +57,7 @@ export interface CodecovCommitData {
     }
     owner: {
         /** An identifier for the code host or other service where the repository lives. */
-        service: 'github' | string
+        service: 'github' | 'gitlab' | 'bitbucket'
 
         /** For GitHub, the name of the repository's owner. */
         username: string

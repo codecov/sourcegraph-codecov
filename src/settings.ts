@@ -9,6 +9,7 @@ export interface Settings {
     ['codecov.decorations.lineCoverage']: boolean
     ['codecov.decorations.lineHitCounts']: boolean
     ['codecov.endpoints']: Endpoint[]
+    ['codecov.location']: Location | undefined
 }
 
 /** Returns a copy of the extension settings with values normalized and defaults applied. */
@@ -22,6 +23,7 @@ export function resolveSettings(raw: Partial<Settings>): Settings {
             'codecov.decorations.lineHitCounts'
         ],
         ['codecov.endpoints']: [resolveEndpoint(raw['codecov.endpoints'])],
+        ['codecov.location']: raw['codecov.location'] || undefined
     }
 }
 
@@ -29,6 +31,12 @@ export interface Endpoint {
     url: string
     token?: string
 }
+
+export interface Location {
+    url?: string
+    service?: 'gh' | 'gl' | 'bb'
+}
+
 
 const CODECOV_IO_URL = 'https://codecov.io'
 

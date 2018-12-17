@@ -98,6 +98,12 @@
         "category": "Codecov"
       },
       {
+        "id": "codecov.setLocation",
+        "command": "codecov.setLocation",
+        "title": "Set location to your custom hosted version control",
+        "category": "Codecov"
+      },
+      {
         "id": "codecov.help",
         "command": "open",
         "commandArguments": [
@@ -143,6 +149,9 @@
         },
         {
           "action": "codecov.setAPIToken"
+        },
+        {
+          "action": "codecov.setLocation"
         },
         {
           "action": "codecov.help"
@@ -195,6 +204,21 @@
                 "description": "The Codecov API token for this endpoint (required for private repositories).",
                 "type": "string"
               }
+            }
+          }
+        },
+        "codecov.location": {
+          "description": "Set the location to your custom hosted version control tool",
+          "type": "object",
+          "default": null,
+          "properties": {
+            "url": {
+              "description": "Define hosted version control url (e.g: sourcecontrol.example.com):",
+              "type": "string"
+            },
+            "service": {
+              "description": "Define hosted version control type (gh|gl|bb):",
+              "type": "string"
             }
           }
         }
