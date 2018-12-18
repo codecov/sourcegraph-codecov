@@ -17,16 +17,16 @@ export interface ResolvedURI {
  */
 export function resolveURI(uri: string): ResolvedURI {
     const url = new URL(uri)
-    if (url.protocol === 'git:') {
-        return {
-            repo: (url.host + url.pathname).replace(/^\/*/, '').toLowerCase(),
-            rev: url.search.slice(1).toLowerCase(),
-            path: url.hash.slice(1),
-        }
+    // if (url.protocol === 'git:') {
+    return {
+        repo: (url.host + url.pathname).replace(/^\/*/, '').toLowerCase(),
+        rev: url.search.slice(1).toLowerCase(),
+        path: url.hash.slice(1),
     }
-    throw new Error(
-        `unrecognized URI: ${JSON.stringify(uri)} (supported URI schemes: git)`
-    )
+    // }
+    // throw new Error(
+    //     `unrecognized URI: ${JSON.stringify(uri)} (supported URI schemes: git)`
+    // )
 }
 
 /**
