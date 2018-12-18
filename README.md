@@ -6,7 +6,7 @@ A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing c
 
 [**🗃️ Source code**](https://github.com/codecov/sourcegraph-codecov)
 
-[**➕ Add to Sourcegraph**](https://sourcegraph.com/extensions/sourcegraph/codecov) (enabled by default on Sourcegraph.com and in Sourcegraph for Chrome)
+[**➕ Add to Sourcegraph**](https://sourcegraph.com/extensions/sourcegraph/codecov)
 
 ## Features
 
@@ -21,10 +21,9 @@ A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing c
 ### On GitHub using the Chrome extension
 
 1.  Install [Sourcegraph for Chrome](https://chrome.google.com/webstore/detail/sourcegraph/dgjhfomjieaadpoljlnidmbgkdffpack) or [Sourcegraph for Firefox](https://docs.sourcegraph.com/integration/browser_extension)
-2.  Open the Sourcegraph for Chrome/Firefox extension options page (by clicking the Sourcegraph icon in the browser toolbar)
-3.  Check the box labeled **Use Sourcegraph extensions** (required while this feature is in alpha)
-4.  Visit [tuf_store.go in theupdateframework/notary on GitHub](https://github.com/theupdateframework/notary/blob/fb795b0bc868746ed2efa2cd7109346bc7ddf0a4/server/storage/tuf_store.go) (or any other file in a public repository that has Codecov code coverage)
-5.  Click the `Coverage: N%` button to toggle Codecov test coverage background colors on the file (scroll down if they aren't immediately visible)
+1.  [Enable the Codecov extension on Sourcegraph](https://sourcegraph.com/extensions/sourcegraph/codecov)
+1.  Visit [tuf_store.go in theupdateframework/notary on GitHub](https://github.com/theupdateframework/notary/blob/fb795b0bc868746ed2efa2cd7109346bc7ddf0a4/server/storage/tuf_store.go) (or any other file in a public repository that has Codecov code coverage)
+1.  Click the `Coverage: N%` button to toggle Codecov test coverage background colors on the file (scroll down if they aren't immediately visible)
 
 ![Screenshot](https://user-images.githubusercontent.com/1976/45107396-53d56880-b0ee-11e8-96e9-ca83e991101c.png)
 
@@ -32,14 +31,14 @@ A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing c
 
 You can use the Codecov extension for private repositories on GitHub.com. Your code is never sent to Sourcegraph.
 
-1.  Follow the [Codecov extension usage instructions](https://github.com/codecov/sourcegraph-codecov#usage) above to install Sourcegraph for Chrome/Firefox and enable the `Use Sourcegraph extensions` feature flag
+1.  Follow the [Codecov extension usage instructions](https://github.com/codecov/sourcegraph-codecov#usage) above to install Sourcegraph for Chrome/Firefox
 2.  Go to the command palette on GitHub (added by the Sourcegraph browser extension, see screenshot below) and choose "Codecov: Set API token for private repositories"
 3.  Enter your Codecov API token
 4.  Visit any file in a GitHub.com private repository that has Codecov coverage data
 
 ![image](https://user-images.githubusercontent.com/1976/45338265-04a19480-b541-11e8-9b35-517f3bbff530.png)
 
-Your code is never sent to Sourcegraph. The Codecov extension runs on the client side in a Web Worker and communicates with Codecov directly to retrieve code coverage data. The Codecov API token is saved in your Chrome/Firefox profile and is not sent to Sourcegraph.
+Your code is never sent to Sourcegraph. The Codecov extension runs on the client side in a Web Worker and communicates with Codecov directly to retrieve code coverage data.
 
 ### On Sourcegraph.com
 
@@ -47,3 +46,10 @@ Your code is never sent to Sourcegraph. The Codecov extension runs on the client
 2.  Click the `Coverage: N%` button to toggle Codecov test coverage background colors on the file (sign-in required)
 
 > The Codecov extension is enabled by default on Sourcegraph.com, so you don't need to add it from its [extension registry listing](https://sourcegraph.com/extensions/sourcegraph/codecov).
+
+#### With a self-hosted Sourcegraph instance and the browser extension
+
+If you're using a self-hosted Sourcegraph instance (not required), you need to explicitly enable Sourcegraph extensions.
+
+1.  Open the Sourcegraph for Chrome/Firefox extension options page (by clicking the Sourcegraph icon in the browser toolbar)
+1.  Check the box labeled **Use Sourcegraph extensions**
