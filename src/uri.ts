@@ -18,6 +18,7 @@ export interface ResolvedURI {
 export function resolveURI(uri: string): ResolvedURI {
     const url = new URL(uri)
     // if (url.protocol === 'git:') {
+    console.log(url)
     return {
         repo: (url.host + url.pathname).replace(/^\/*/, '').toLowerCase(),
         rev: url.search.slice(1).toLowerCase(),
@@ -54,6 +55,7 @@ export function codecovParamsForRepositoryCommit(
         });
     }
 
+    console.log(uri)
 
     const host: any = hosts.find((host: any) => {
         if (uri.repo.includes(host.name)) {
