@@ -1,13 +1,14 @@
 {
   "name": "codecov",
   "publisher": "sourcegraph",
-  "title": "Codecov",
-  "description": "Shows code coverage from Codecov",
+  "description": "Shows Codecov code coverage",
   "icon": "https://user-images.githubusercontent.com/1387653/45938068-4daf0b00-bf7b-11e8-9c38-3619d61af834.png",
   "repository": {
     "type": "git",
     "url": "https://github.com/codecov/sourcegraph-codecov.git"
   },
+  "categories": ["External services", "Code analysis", "Reports and stats"],
+  "tags": ["codecov", "coverage", "testing"],
   "version": "0.0.0-development",
   "license": "MIT",
   "bugs": {
