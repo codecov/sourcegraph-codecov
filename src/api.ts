@@ -1,3 +1,6 @@
+import * as sourcegraph from 'sourcegraph'
+import { Settings } from './settings';
+
 /** The arguments for getCommitCoverage. */
 export interface CodecovGetCommitCoverageArgs {
     /**
@@ -74,12 +77,19 @@ export interface CodecovCommitData {
  * See https://docs.codecov.io/v5.0.0/reference#section-get-a-single-commit.
  */
 export const codecovGetCommitCoverage = memoizeAsync(
-    async (args: CodecovGetCommitCoverageArgs): Promise<CodecovCommitData> =>
-        (await fetch(commitCoverageURL(args), {
+    async (args: CodecovGetCommitCoverageArgs): Promise<CodecovCommitData> => {
+        const endpoints: any = sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
+        console.log(endpoints)
+        const res = await fetch(commitCoverageURL(args), {
             method: 'GET',
             mode: 'cors',
-        })).json(),
-    commitCoverageURL
+            headers:{
+                "Authorization": 'token ' + endpoints[0].token
+            }
+        })
+
+        return res.json()
+    }, commitCoverageURL
 )
 
 /**
@@ -95,12 +105,8 @@ function commitCoverageURL({
     sha,
     token,
 }: CodecovGetCommitCoverageArgs): string {
-    const tokenSuffix = token
-        ? `&access_token=${encodeURIComponent(token)}`
-        : ''
-
     // The ?src=extension is necessary to get the data for all files in the response.
-    return `${baseURL}/api/${service}/${owner}/${repo}/commits/${sha}?src=extension${tokenSuffix}`
+    return `${baseURL}/api/${service}/${owner}/${repo}/commits/${sha}?src=extension`
 }
 
 /**

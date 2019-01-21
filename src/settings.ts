@@ -33,8 +33,9 @@ export interface Endpoint {
 }
 
 export interface Location {
-    url?: string
-    service?: 'gh' | 'gl' | 'bb'
+    versionControlLocation?: string
+    versionControlType?: 'gh' | 'gl' | 'bb'
+    coverageLocation?: string
 }
 
 
