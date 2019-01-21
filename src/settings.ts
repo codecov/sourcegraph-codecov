@@ -9,7 +9,6 @@ export interface Settings {
     ['codecov.decorations.lineCoverage']: boolean
     ['codecov.decorations.lineHitCounts']: boolean
     ['codecov.endpoints']: Endpoint[]
-    ['codecov.location']: Location | undefined
 }
 
 /** Returns a copy of the extension settings with values normalized and defaults applied. */
@@ -22,20 +21,14 @@ export function resolveSettings(raw: Partial<Settings>): Settings {
         ['codecov.decorations.lineHitCounts']: !!raw[
             'codecov.decorations.lineHitCounts'
         ],
-        ['codecov.endpoints']: [resolveEndpoint(raw['codecov.endpoints'])],
-        ['codecov.location']: raw['codecov.location'] || undefined
+        ['codecov.endpoints']: [resolveEndpoint(raw['codecov.endpoints'])]
     }
 }
 
 export interface Endpoint {
     url: string
     token?: string
-}
-
-export interface Location {
-    versionControlLocation?: string
-    versionControlType?: 'gh' | 'gl' | 'bb'
-    coverageLocation?: string
+    service?: string
 }
 
 
@@ -57,6 +50,7 @@ export function resolveEndpoint(
             ? urlWithOnlyProtocolAndHost(endpoints[0].url)
             : CODECOV_IO_URL,
         token: endpoints[0].token || undefined,
+        service: endpoints[0].service || undefined
     }
 }
 

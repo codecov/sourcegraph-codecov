@@ -37,73 +37,37 @@ export function resolveURI(uri: string): ResolvedURI {
 export function codecovParamsForRepositoryCommit(
     uri: Pick<ResolvedURI, 'repo' | 'rev'>
 ): Pick<CodecovGetCommitCoverageArgs, 'service' | 'owner' | 'repo' | 'sha'> {
+    try {
+        const endpoints: Endpoint[] | undefined = sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
 
+        const knownHosts: any[] = [
+            { name: 'github.com', service: 'gh' },
+            { name: 'gitlab.com', service: 'gl' },
+            { name: 'bitbucket.org', service: 'bb' },
+        ];
 
-    // const hosts: any[] = [
-    //     { name: 'github.com', service: 'gh' },
-    //     { name: 'gitlab.com', service: 'gl' },
-    //     { name: 'bitbucket.org', service: 'bb' },
-    // ];
+        const knownHost: any = knownHosts.find((knownHost: any) => {
+            if (uri.repo.includes(knownHost.name)) {
+                return knownHost;
+            }
+        });
 
-    const location: Location | undefined = sourcegraph.configuration.get<Settings>().get('codecov.location')
+        const parts = uri.repo.split('/', 4)
 
-    // if (location && location.versionControlLocation && location.versionControlType) {
-    //     hosts.push({
-    //         name: location.versionControlLocation,
-    //         service: location.versionControlType,
-    //     });
+        let service = knownHost && knownHost.service || endpoints && endpoints[0] && endpoints[0].service || 'gh';
 
-    //     console.log(hosts)
-    // }
+        return {
+            service: service,
+            owner: parts[1],
+            repo: parts[2],
+            sha: uri.rev,
+        };
 
-    // console.log(uri)
-
-    // const host: any = hosts.find((host: any) => {
-    //     if (uri.repo.includes(host.name)) {
-    //         return host;
-    //     }
-    // });
-
-    // if (host) {
-
-
-    //     console.log(parts)
-
-    //     if (parts.length !== 3) {
-    //         throw new Error(
-    //             `invalid GitHub.com repository: ${JSON.stringify(
-    //                 uri.repo
-    //             )} (expected "github.com/owner/repo")`
-    //         )
-    //     }
-
-    //     console.log('result', {
-    //         service: host.service,
-    //         owner: parts[1],
-    //         repo: parts[2],
-    //         sha: uri.rev,
-    //     })
-
-    //     return {
-    //         service: host.service,
-    //         owner: parts[1],
-    //         repo: parts[2],
-    //         sha: uri.rev,
-    //     }
-    // }
-
-    const parts: string[] = uri.repo.split('/', 4);
-
-    return {
-        service: location && location.versionControlType || 'gh',
-        owner: parts[1],
-        repo: parts[2],
-        sha: uri.rev,
-    };
-
-    // throw new Error(
-    //     `extension does not yet support the repository ${JSON.stringify(
-    //         uri.repo
-    //     )}`
-    // )
+    } catch (err) {
+        throw new Error(
+            `extension does not yet support the repository ${JSON.stringify(
+                uri.repo
+            )}`
+        )
+    }
 }

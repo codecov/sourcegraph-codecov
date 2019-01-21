@@ -108,26 +108,53 @@ export function activate(): void {
         sourcegraph.workspace.onDidChangeRoots.subscribe(() => updateContext())
     }
 
+
+    sourcegraph.commands.registerCommand('codecov.setupEnterprise', async () => {
+        const endpoint = resolveEndpoint(
+            sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
+        )
+        if (!sourcegraph.app.activeWindow) {
+            throw new Error(
+                'To set a Codecov Endpoint, navigate to a file and then re-run this command.'
+            )
+        }
+
+        const service = await sourcegraph.app.activeWindow.showInputBox({
+            prompt: `Version control type (gh/ghe/bb/gl):`,
+            value: endpoint.service || '',
+        })
+
+        const url = await sourcegraph.app.activeWindow.showInputBox({
+            prompt: `Codecov endpoint:`,
+            value: endpoint.url || '',
+        })
+
+        if (url !== undefined && service !== undefined) {
+            // TODO: Only supports setting the token of the first API endpoint.
+            return sourcegraph.configuration
+                .get<Settings>()
+                .update('codecov.endpoints', [
+                    { ...endpoint, url, service },
+                ])
+        }
+    })
+
     // Handle the "Set Codecov API token" command (show the user a prompt for their token, and save
     // their input to settings).
     sourcegraph.commands.registerCommand('codecov.setAPIToken', async () => {
         const endpoint = resolveEndpoint(
             sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
         )
+
         if (!sourcegraph.app.activeWindow) {
             throw new Error(
                 'To set a Codecov API token, navigate to a file and then re-run this command.'
             )
         }
 
-        const url = await sourcegraph.app.activeWindow.showInputBox({
-            prompt: `Codecov Enterprise location:`,
-            value: endpoint.url || '',
-        })
-
         const token = await sourcegraph.app.activeWindow.showInputBox({
             prompt: `Codecov API token (for ${endpoint.url}):`,
-            value: endpoint.token || '',
+            value: endpoint.token || undefined,
         })
 
         if (token !== undefined) {
@@ -135,49 +162,8 @@ export function activate(): void {
             return sourcegraph.configuration
                 .get<Settings>()
                 .update('codecov.endpoints', [
-                    { ...endpoint, token: token || undefined, url: url || '' },
+                    { ...endpoint, token },
                 ])
-        }
-    })
-
-    sourcegraph.commands.registerCommand('codecov.setLocation', async () => {
-        const location: Location = sourcegraph.configuration.get<Settings>().get('codecov.location') || {}
-
-        if (!sourcegraph.app.activeWindow) {
-            throw new Error(
-                'To set a Codecov API location url, navigate to a file and then re-run this command.'
-            )
-        }
-
-        let versionControlLocation: any = await sourcegraph.app.activeWindow.showInputBox({
-            prompt: `Define hosted version control url (e.g: sourcecontrol.example.com):`,
-            value: location.versionControlLocation || '',
-        })
-
-        let versionControlType: any = await sourcegraph.app.activeWindow.showInputBox({
-            prompt: `Define hosted version control type (gh|gl|bb):`,
-            value: location.versionControlType || 'gh',
-        })
-
-        let coverageLocation: any = await sourcegraph.app.activeWindow.showInputBox({
-            prompt: `Define hosted codecov instance url (e.g: codecov.example.com):`,
-            value: location.coverageLocation || '',
-        })
-
-        if (versionControlLocation !== undefined || versionControlType !== undefined) {
-
-            if (versionControlLocation.endsWith('/')) {
-                versionControlLocation = versionControlLocation.slice(0, -1);
-            }
-
-            // TODO: Only supports setting the token of the first API endpoint.
-            return sourcegraph.configuration
-                .get<Settings>()
-                .update('codecov.location',
-                    { ...location, versionControlLocation, versionControlType, coverageLocation },
-                )
-        } else {
-            throw new Error('You did not insert a url or service')
         }
     })
 }
