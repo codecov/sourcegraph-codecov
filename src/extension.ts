@@ -1,4 +1,4 @@
-import { Settings, resolveSettings, resolveEndpoint, Location } from './settings'
+import { Settings, resolveSettings, resolveEndpoint, Location, Endpoint } from './settings'
 import * as sourcegraph from 'sourcegraph'
 import {
     getFileCoverageRatios,
@@ -70,11 +70,8 @@ export function activate(): void {
             [key: string]: string | number | boolean | null
         } = {}
 
-        const location: Location | undefined = sourcegraph.configuration.get<Settings>().get('codecov.location')
-
         const p = codecovParamsForRepositoryCommit(lastURI)
-        // TODO Support non-codecov.io endpoints.
-        const repoURL = `${location && location.coverageLocation || 'https://codecov.io'}/${p.service}/${p.owner}/${p.repo}`
+        const repoURL = `${p.baseURL || 'https://codecov.io'}/${p.service}/${p.owner}/${p.repo}`
         context['codecov.repoURL'] = repoURL
         const baseFileURL = `${repoURL}/src/${p.sha}`
         context['codecov.commitURL'] = `${repoURL}/commit/${p.sha}`

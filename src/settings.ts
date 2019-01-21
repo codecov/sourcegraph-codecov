@@ -26,7 +26,7 @@ export function resolveSettings(raw: Partial<Settings>): Settings {
 }
 
 export interface Endpoint {
-    url: string
+    url?: string
     token?: string
     service?: string
 }
