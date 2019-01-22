@@ -206,7 +206,7 @@
               },
               "type": {
                 "description": "Define hosted version control type (gh|ghe|bb|gl):",
-                "type": "enum"
+                "type": "string"
               }
             }
           }
