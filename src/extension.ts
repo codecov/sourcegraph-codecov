@@ -1,4 +1,4 @@
-import { Settings, resolveSettings, resolveEndpoint, Location, Endpoint } from './settings'
+import { Settings, resolveSettings, resolveEndpoint, Location, Endpoint, Service } from './settings'
 import * as sourcegraph from 'sourcegraph'
 import {
     getFileCoverageRatios,

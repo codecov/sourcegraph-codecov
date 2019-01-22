@@ -7,7 +7,7 @@ export interface CodecovGetCommitCoverageArgs {
     baseURL: string
 
     /** The identifier for the service where the repository lives. */
-    service: 'gh' | 'gl' | 'bb' | string
+    service: 'gh' | 'gl' | 'bb' | 'ghe'
 
     /** The value for the :owner URL parameter (the repository's owner). */
     owner: string

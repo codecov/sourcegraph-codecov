@@ -36,24 +36,18 @@ export function codecovParamsForRepositoryCommit(
         const endpoints: Endpoint[] | undefined = sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
         const baseURL: string = endpoints && endpoints[0] && endpoints[0].url || ''
 
-        const knownHosts: any[] = [
+        const knownHosts: { name: string, service: string }[] = [
             { name: 'github.com', service: 'gh' },
             { name: 'gitlab.com', service: 'gl' },
             { name: 'bitbucket.org', service: 'bb' },
         ];
 
-        const knownHost: any = knownHosts.find((knownHost: any) => {
-            if (uri.repo.includes(knownHost.name)) {
-                return knownHost;
-            }
-        });
+
+        const knownHost: any = knownHosts.find(knownHost => uri.repo.includes(knownHost.name))
 
         let service = endpoints && endpoints[0] && endpoints[0].service || 'gh'
 
-        const parts = uri.repo.split('/', 4)
-
-        const owner = parts[1];
-        const repo = parts[2];
+        const [, owner, repo] = uri.repo.split('/', 4)
 
         service = knownHost && knownHost.service || service;
 
