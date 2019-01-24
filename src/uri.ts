@@ -24,6 +24,11 @@ export function resolveURI(uri: string): ResolvedURI {
     }
 }
 
+export interface KnownHost {
+    name: string;
+    service: string;
+}
+
 /**
  * Returns the URL parameters used to access the Codecov API for the URI's repository.
  *
@@ -36,14 +41,14 @@ export function codecovParamsForRepositoryCommit(
         const endpoints: Endpoint[] | undefined = sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
         const baseURL: string = endpoints && endpoints[0] && endpoints[0].url || ''
 
-        const knownHosts: { name: string, service: string }[] = [
+        const knownHosts: KnownHost[] = [
             { name: 'github.com', service: 'gh' },
             { name: 'gitlab.com', service: 'gl' },
             { name: 'bitbucket.org', service: 'bb' },
         ];
 
 
-        const knownHost: any = knownHosts.find(knownHost => uri.repo.includes(knownHost.name))
+        const knownHost: KnownHost | undefined = knownHosts.find(knownHost => uri.repo.includes(knownHost.name))
 
         let service: string = endpoints && endpoints[0] && endpoints[0].service || 'gh'
 
