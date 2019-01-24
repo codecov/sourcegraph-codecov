@@ -1,4 +1,6 @@
+import * as sourcegraph from 'sourcegraph'
 import { CodecovGetCommitCoverageArgs } from './api'
+import { Settings, Endpoint } from './settings';
 
 /**
  * A resolved URI identifies a path in a repository at a specific revision.
@@ -15,16 +17,16 @@ export interface ResolvedURI {
  */
 export function resolveURI(uri: string): ResolvedURI {
     const url = new URL(uri)
-    if (url.protocol === 'git:') {
-        return {
-            repo: (url.host + url.pathname).replace(/^\/*/, '').toLowerCase(),
-            rev: url.search.slice(1).toLowerCase(),
-            path: url.hash.slice(1),
-        }
+    return {
+        repo: (url.host + url.pathname).replace(/^\/*/, '').toLowerCase(),
+        rev: url.search.slice(1).toLowerCase(),
+        path: url.hash.slice(1),
     }
-    throw new Error(
-        `unrecognized URI: ${JSON.stringify(uri)} (supported URI schemes: git)`
-    )
+}
+
+export interface KnownHost {
+    name: string;
+    service: string;
 }
 
 /**
@@ -34,27 +36,39 @@ export function resolveURI(uri: string): ResolvedURI {
  */
 export function codecovParamsForRepositoryCommit(
     uri: Pick<ResolvedURI, 'repo' | 'rev'>
-): Pick<CodecovGetCommitCoverageArgs, 'service' | 'owner' | 'repo' | 'sha'> {
-    // TODO: Support services (code hosts) other than GitHub.com, such as GitHub Enterprise, GitLab, etc.
-    if (uri.repo.startsWith('github.com/')) {
-        const parts = uri.repo.split('/', 4)
-        if (parts.length !== 3) {
-            throw new Error(
-                `invalid GitHub.com repository: ${JSON.stringify(
-                    uri.repo
-                )} (expected "github.com/owner/repo")`
-            )
-        }
+): Pick<CodecovGetCommitCoverageArgs, 'baseURL' | 'service' | 'owner' | 'repo' | 'sha'> {
+    try {
+        const endpoints: Endpoint[] | undefined = sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
+        const baseURL: string = endpoints && endpoints[0] && endpoints[0].url || ''
+
+        const knownHosts: KnownHost[] = [
+            { name: 'github.com', service: 'gh' },
+            { name: 'gitlab.com', service: 'gl' },
+            { name: 'bitbucket.org', service: 'bb' },
+        ];
+
+
+        const knownHost: KnownHost | undefined = knownHosts.find(knownHost => uri.repo.includes(knownHost.name))
+
+        let service: string = endpoints && endpoints[0] && endpoints[0].service || 'gh'
+
+        const [, owner, repo] = uri.repo.split('/', 4)
+
+        service = knownHost && knownHost.service || service;
+
         return {
-            service: 'gh',
-            owner: parts[1],
-            repo: parts[2],
+            baseURL,
+            service,
+            owner,
+            repo,
             sha: uri.rev,
-        }
+        };
+
+    } catch (err) {
+        throw new Error(
+            `extension does not yet support the repository ${JSON.stringify(
+                uri.repo
+            )}`
+        )
     }
-    throw new Error(
-        `extension does not yet support the repository ${JSON.stringify(
-            uri.repo
-        )}`
-    )
 }
