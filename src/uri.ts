@@ -18,8 +18,8 @@ export interface ResolvedURI {
 export function resolveURI(uri: string): ResolvedURI {
     const url = new URL(uri)
     return {
-        repo: (url.host + url.pathname).replace(/^\/*/, '').toLowerCase(),
-        rev: url.search.slice(1).toLowerCase(),
+        repo: (url.host + url.pathname).replace(/^\/*/, ''),
+        rev: url.search.slice(1),
         path: url.hash.slice(1),
     }
 }
