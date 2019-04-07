@@ -1,4 +1,5 @@
 {
+  "$schema": "https://raw.githubusercontent.com/sourcegraph/sourcegraph/master/shared/src/schema/extension.schema.json",
   "name": "codecov",
   "publisher": "sourcegraph",
   "description": "Shows code coverage from Codecov",
@@ -42,7 +43,8 @@
         "category": "Codecov",
         "actionItem": {
           "label": "Coverage: ${get(context, `codecov.coverageRatio.${resource.uri}`)}%",
-          "description": "${config.codecov.decorations.lineCoverage && \"Hide\" || \"Show\"} code coverage\nCmd/Ctrl+Click: View on Codecov"
+          "description": "${config.codecov.decorations.lineCoverage && \"Hide\" || \"Show\"} code coverage\nCmd/Ctrl+Click: View on Codecov",
+          "pressed": "config.codecov.decorations.lineCoverage"
         }
       },
       {
