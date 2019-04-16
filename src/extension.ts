@@ -1,4 +1,4 @@
-import { Settings, resolveSettings, resolveEndpoint } from './settings'
+import { Settings, resolveSettings, resolveEndpoint, Location, Endpoint, Service } from './settings'
 import * as sourcegraph from 'sourcegraph'
 import {
     getFileCoverageRatios,
@@ -7,8 +7,6 @@ import {
 } from './model'
 import { codecovToDecorations } from './decoration'
 import { resolveURI, codecovParamsForRepositoryCommit } from './uri'
-
-const decorationType = sourcegraph.app.createDecorationType && sourcegraph.app.createDecorationType()
 
 /** Entrypoint for the Codecov Sourcegraph extension. */
 export function activate(): void {
@@ -33,7 +31,7 @@ export function activate(): void {
                     settings['codecov.endpoints'][0]
                 )
                 editor.setDecorations(
-                    decorationType,
+                    null,
                     codecovToDecorations(settings, decorations)
                 )
             }
