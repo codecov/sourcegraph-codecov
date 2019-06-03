@@ -1,6 +1,6 @@
 import { LineCoverage, FileLineCoverage } from './model'
 import { Settings } from './settings'
-import { hsla, RED_HUE, GREEN_HUE, YELLOW_HUE } from './colors'
+import { hsl } from './colors'
 import { TextDocumentDecoration, Range } from 'sourcegraph'
 
 export function codecovToDecorations(
@@ -18,19 +18,24 @@ export function codecovToDecorations(
         if (coverage === null) {
             continue
         }
-        const line = parseInt(lineStr) - 1 // 0-indexed line
+        const line = parseInt(lineStr, 10) - 1 // 0-indexed line
         const decoration: TextDocumentDecoration = {
             range: new Range(line, 0, line, 0),
             isWholeLine: true,
         }
         if (settings['codecov.decorations.lineCoverage']) {
-            decoration.backgroundColor = lineColor(coverage, 0.7, 0.25)
+            decoration.light = {
+                backgroundColor: lineColor(coverage, 0.8),
+            }
+            decoration.dark = {
+                backgroundColor: lineColor(coverage, 0.2),
+            }
         }
         if (settings['codecov.decorations.lineHitCounts']) {
             decoration.after = {
-                backgroundColor: lineColor(coverage, 0.7, 1),
-                color: lineColor(coverage, 0.25, 1),
                 ...lineText(coverage),
+                backgroundColor: lineColor(coverage, 0.4),
+                color: 'white',
             }
         }
         decorations.push(decoration)
@@ -38,23 +43,17 @@ export function codecovToDecorations(
     return decorations
 }
 
-function lineColor(
-    coverage: LineCoverage,
-    lightness: number,
-    alpha: number
-): string {
-    let hue: number
+function lineColor(coverage: LineCoverage, lightness: number): string {
     if (coverage === 0 || coverage === null) {
-        hue = RED_HUE
+        return hsl(0, 1, lightness) // red
     } else if (
         typeof coverage === 'number' ||
         coverage.hits === coverage.branches
     ) {
-        hue = GREEN_HUE
+        return hsl(120, 0.64, lightness) // green
     } else {
-        hue = YELLOW_HUE // partially covered
+        return hsl(62, 0.97, lightness) // partially covered, yellow
     }
-    return hsla(hue, lightness, alpha)
 }
 
 function lineText(
@@ -69,15 +68,18 @@ function lineText(
                 contentText: ` ${coverage} `,
                 hoverMessage: `${coverage} hit${
                     coverage === 1 ? '' : 's'
-                } (Codecov)`,
+                } (CodeCov)`,
             }
         }
-        return { hoverMessage: 'not covered by test (Codecov)' }
+        return {
+            contentText: ' 0 ',
+            hoverMessage: 'not covered by test (CodeCov)',
+        }
     }
     return {
         contentText: ` ${coverage.hits}/${coverage.branches} `,
         hoverMessage: `${coverage.hits}/${coverage.branches} branch${
             coverage.branches === 1 ? '' : 'es'
-        } hit (Codecov)`,
+        } hit (CodeCov)`,
     }
 }
