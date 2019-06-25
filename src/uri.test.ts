@@ -8,11 +8,11 @@ import {
 describe('resolveURI', () => {
     describe('parsing', () => {
         it('requires a base for file: URIs', () =>
-            assert.throws(() => resolveURI(null, 'file:///d/f')))
+            assert.throws(() => resolveURI('file:///d/f')))
 
         it('parses git: URIs', () =>
             assert.deepStrictEqual(
-                resolveURI(null, 'git://example.com/repo?v#d/f'),
+                resolveURI('git://example.com/repo?v#d/f'),
                 {
                     repo: 'example.com/repo',
                     rev: 'v',
@@ -24,7 +24,7 @@ describe('resolveURI', () => {
     describe('resolving', () => {
         it('resolves file: URIs', () =>
             assert.deepStrictEqual(
-                resolveURI({ repo: 'r', rev: 'v' }, 'file:///d/f'),
+                resolveURI('file:///d/f'),
                 {
                     repo: 'r',
                     rev: 'v',
@@ -34,10 +34,7 @@ describe('resolveURI', () => {
 
         it('resolves git: URIs with the same base', () =>
             assert.deepStrictEqual(
-                resolveURI(
-                    { repo: 'example.com/repo', rev: 'v' },
-                    'git://example.com/repo?v#d/f'
-                ),
+                resolveURI('git://example.com/repo?v#d/f'),
                 {
                     repo: 'example.com/repo',
                     rev: 'v',
@@ -47,10 +44,7 @@ describe('resolveURI', () => {
 
         it('resolves git: URIs with a different base', () =>
             assert.deepStrictEqual(
-                resolveURI(
-                    { repo: 'example.com/repo', rev: 'v' },
-                    'git://example.com/repo2?v2#d/f'
-                ),
+                resolveURI('git://example.com/repo2?v2#d/f'),
                 {
                     repo: 'example.com/repo2',
                     rev: 'v2',
@@ -60,7 +54,7 @@ describe('resolveURI', () => {
     })
 
     it('refuses other URI schemes', () =>
-        assert.throws(() => resolveURI(null, 'example://a')))
+        assert.throws(() => resolveURI('example://a')))
 })
 
 describe('codecovParamsForRepo', () => {

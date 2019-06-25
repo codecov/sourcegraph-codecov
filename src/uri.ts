@@ -15,7 +15,7 @@ export interface ResolvedURI {
  * Resolve a URI of the forms git://github.com/owner/repo?rev#path and file:///path to an absolute reference, using
  * the given base (root) URI.
  */
-export function resolveURI(uri: string): ResolvedURI {
+export function resolveURI (uri: string): ResolvedURI {
     const url = new URL(uri)
     return {
         repo: (url.host + url.pathname).replace(/^\/*/, ''),
@@ -34,11 +34,11 @@ export interface KnownHost {
  *
  * Currently only GitHub.com repositories are supported.
  */
-export function codecovParamsForRepositoryCommit(
+export function codecovParamsForRepositoryCommit (
     uri: Pick<ResolvedURI, 'repo' | 'rev'>
 ): Pick<CodecovGetCommitCoverageArgs, 'baseURL' | 'service' | 'owner' | 'repo' | 'sha'> {
     try {
-        const endpoints: Endpoint[] | undefined = sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
+        const endpoints: Readonly<Endpoint[]> | undefined = sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
         const baseURL: string = endpoints && endpoints[0] && endpoints[0].url || ''
 
         const knownHosts: KnownHost[] = [
