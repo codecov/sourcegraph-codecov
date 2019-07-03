@@ -30,7 +30,8 @@ export function activate(): void {
             for (const editor of editors) {
                 const decorations = await getFileLineCoverage(
                     resolveURI(editor.document.uri),
-                    settings['codecov.endpoints'][0]
+                    settings['codecov.endpoints'][0],
+                    sourcegraph
                 )
                 editor.setDecorations(
                     decorationType,
@@ -72,7 +73,7 @@ export function activate(): void {
             [key: string]: string | number | boolean | null
         } = {}
 
-        const p = codecovParamsForRepositoryCommit(lastURI)
+        const p = codecovParamsForRepositoryCommit(lastURI, sourcegraph)
         const repoURL = `${p.baseURL || 'https://codecov.io'}/${p.service}/${p.owner}/${p.repo}`
         context['codecov.repoURL'] = repoURL
         const baseFileURL = `${repoURL}/src/${p.sha}`
@@ -82,7 +83,8 @@ export function activate(): void {
             // Store overall commit coverage ratio.
             const commitCoverage = await getCommitCoverageRatio(
                 lastURI,
-                endpoint
+                endpoint,
+                sourcegraph
             )
             context['codecov.commitCoverage'] = commitCoverage
                 ? commitCoverage.toFixed(1)
@@ -90,7 +92,7 @@ export function activate(): void {
 
             // Store coverage ratio (and Codecov report URL) for each file at this commit so that
             // template strings in contributions can refer to these values.
-            const fileRatios = await getFileCoverageRatios(lastURI, endpoint)
+            const fileRatios = await getFileCoverageRatios(lastURI, endpoint, sourcegraph)
             for (const [path, ratio] of Object.entries(fileRatios)) {
                 const uri = `git://${lastURI.repo}?${lastURI.rev}#${path}`
                 context[`codecov.coverageRatio.${uri}`] = ratio.toFixed(0)

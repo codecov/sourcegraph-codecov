@@ -1,4 +1,3 @@
-import * as sourcegraph from 'sourcegraph'
 import { CodecovGetCommitCoverageArgs } from './api'
 import { Settings, Endpoint } from './settings';
 
@@ -17,10 +16,23 @@ export interface ResolvedURI {
  */
 export function resolveURI (uri: string): ResolvedURI {
     const url = new URL(uri)
+    if (url.protocol !== 'git:') {
+        throw new Error(`Unsupported protocol: ${url.protocol}`)
+    }
+    const repo = (url.host + url.pathname).replace(/^\/*/, '')
+    const rev = url.search.slice(1)
+    if (!rev) {
+        throw new Error('Could not determine revision')
+    }
+    const path = url.hash.slice(1)
+    console.log(uri, path)
+    if (!path) {
+        throw new Error('Could not determine file path')
+    }
     return {
-        repo: (url.host + url.pathname).replace(/^\/*/, ''),
-        rev: url.search.slice(1),
-        path: url.hash.slice(1),
+        repo,
+        rev,
+        path
     }
 }
 
@@ -35,7 +47,8 @@ export interface KnownHost {
  * Currently only GitHub.com repositories are supported.
  */
 export function codecovParamsForRepositoryCommit (
-    uri: Pick<ResolvedURI, 'repo' | 'rev'>
+    uri: Pick<ResolvedURI, 'repo' | 'rev'>,
+    sourcegraph: typeof import('sourcegraph')
 ): Pick<CodecovGetCommitCoverageArgs, 'baseURL' | 'service' | 'owner' | 'repo' | 'sha'> {
     try {
         const endpoints: Readonly<Endpoint[]> | undefined = sourcegraph.configuration.get<Settings>().get('codecov.endpoints')

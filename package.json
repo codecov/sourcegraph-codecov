@@ -268,6 +268,7 @@
     "last 1 Safari versions"
   ],
   "devDependencies": {
+    "@sourcegraph/extension-api-stubs": "^0.2.2",
     "@types/mocha": "^5.2.7",
     "@types/node": "^10.14.10",
     "lnfs-cli": "^2.1.0",
@@ -277,11 +278,10 @@
     "parcel-bundler": "^1.12.3",
     "prettier": "^1.18.2",
     "source-map-support": "^0.5.12",
-    "sourcegraph": "^20.2.0",
+    "sourcegraph": "^23.0.1",
     "ts-node": "^7.0.1",
     "tslint": "^5.18.0",
     "tslint-language-service": "^0.9.9",
     "typescript": "^3.5.2"
-  },
-  "dependencies": {}
+  }
 }
