@@ -250,17 +250,16 @@
   },
   "nyc": {
     "extension": [
+      ".tsx",
       ".ts"
     ],
-    "exclude": [
-      "**/*.d.ts",
-      "**/*.test.ts",
-      "**/*.js"
+    "include": [
+      "src/**/*.ts?(x)"
     ],
-    "cache": true,
-    "reporter": [
-      "text",
-      "lcovonly"
+    "exclude": [
+      "**/*.test.ts?(x)",
+      "**/*.d.ts",
+      "**/*.js"
     ]
   },
   "browserslist": [
