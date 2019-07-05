@@ -1,8 +1,8 @@
 import { createStubSourcegraphAPI } from '@sourcegraph/extension-api-stubs'
 import * as assert from 'assert'
 import {
-    resolveURI,
     codecovParamsForRepositoryCommit,
+    resolveURI,
 } from './uri'
 
 describe('resolveURI', () => {

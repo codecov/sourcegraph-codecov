@@ -1,5 +1,5 @@
 import { CodecovGetCommitCoverageArgs } from './api'
-import { Settings, Endpoint } from './settings';
+import { Endpoint, Settings } from './settings';
 
 /**
  * A resolved URI identifies a path in a repository at a specific revision.
@@ -14,7 +14,7 @@ export interface ResolvedURI {
  * Resolve a URI of the forms git://github.com/owner/repo?rev#path and file:///path to an absolute reference, using
  * the given base (root) URI.
  */
-export function resolveURI (uri: string): ResolvedURI {
+export function resolveURI(uri: string): ResolvedURI {
     const url = new URL(uri)
     if (url.protocol !== 'git:') {
         throw new Error(`Unsupported protocol: ${url.protocol}`)
@@ -46,7 +46,7 @@ export interface KnownHost {
  *
  * Currently only GitHub.com repositories are supported.
  */
-export function codecovParamsForRepositoryCommit (
+export function codecovParamsForRepositoryCommit(
     uri: Pick<ResolvedURI, 'repo' | 'rev'>,
     sourcegraph: typeof import('sourcegraph')
 ): Pick<CodecovGetCommitCoverageArgs, 'baseURL' | 'service' | 'owner' | 'repo' | 'sha'> {
@@ -59,7 +59,6 @@ export function codecovParamsForRepositoryCommit (
             { name: 'gitlab.com', service: 'gl' },
             { name: 'bitbucket.org', service: 'bb' },
         ];
-
 
         const knownHost: KnownHost | undefined = knownHosts.find(knownHost => uri.repo.includes(knownHost.name))
 

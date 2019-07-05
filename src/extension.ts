@@ -1,12 +1,12 @@
-import { Settings, resolveSettings, resolveEndpoint } from './settings'
 import * as sourcegraph from 'sourcegraph'
+import { codecovToDecorations } from './decoration'
 import {
-    getFileCoverageRatios,
     getCommitCoverageRatio,
+    getFileCoverageRatios,
     getFileLineCoverage,
 } from './model'
-import { codecovToDecorations } from './decoration'
-import { resolveURI, codecovParamsForRepositoryCommit } from './uri'
+import { resolveEndpoint, resolveSettings, Settings } from './settings'
+import { codecovParamsForRepositoryCommit, resolveURI } from './uri'
 
 const decorationType = sourcegraph.app.createDecorationType && sourcegraph.app.createDecorationType()
 
@@ -108,7 +108,6 @@ export function activate(): void {
     if (sourcegraph.workspace.onDidChangeRoots) {
         sourcegraph.workspace.onDidChangeRoots.subscribe(() => updateContext())
     }
-
 
     sourcegraph.commands.registerCommand('codecov.setupEnterprise', async () => {
         const endpoint = resolveEndpoint(
