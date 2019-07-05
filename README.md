@@ -1,5 +1,8 @@
 # Codecov Sourcegraph extension
 
+[![Build Status](https://travis-ci.org/codecov/sourcegraph-codecov.png)](https://travis-ci.org/codecov/sourcegraph-codecov)
+[![codecov](https://codecov.io/gh/codecov/sourcegraph-codecov/branch/master/graph/badge.svg)](https://codecov.io/gh/codecov/sourcegraph-codecov)
+
 A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing code coverage information from [Codecov](https://codecov.io) on GitHub, Sourcegraph, and other tools.
 
 [**🎥 Demo video**](https://www.youtube.com/watch?v=j1eWBa3rWH8)
@@ -42,15 +45,15 @@ Your code is never sent to Sourcegraph. The Codecov extension runs on the client
 
 #### With Codecov Enterprise and GitHub Enterprise
 
-You can use this extension to overlay coverage information from your Codecov Enterprise install into GitHub Enterprise. 
+You can use this extension to overlay coverage information from your Codecov Enterprise install into GitHub Enterprise.
 
 1.  Follow the [Codecov extension usage instructions](https://github.com/codecov/sourcegraph-codecov#usage) above to install Sourcegraph for Chrome/Firefox
-2.  From the command palette (added by the Sourcegraph browser extension, see screenshot above) on GitHub Enterprise click, "Codecov: Setup up Codecov Enterprise" 
+2.  From the command palette (added by the Sourcegraph browser extension, see screenshot above) on GitHub Enterprise click, "Codecov: Setup up Codecov Enterprise"
 3.  From the pop up that appears, set your Version control type to: `ghe`
-4.  From the next pop up that appears, set your Codecov endpoint, this is just the root level of your Codecov Enterprise domain, e.g., `https://codecov.mycompany.com`. 
+4.  From the next pop up that appears, set your Codecov endpoint, this is just the root level of your Codecov Enterprise domain, e.g., `https://codecov.mycompany.com`.
 5.  Go to the command palette on GitHub and choose "Codecov: Set API token for private repositories"
 6.  Enter your Codecov Enterprise API token.
-7.  Visit any file in your Github Enterprise install with coverage data uploaded to Codecov Enterprise to see coverage data. 
+7.  Visit any file in your Github Enterprise install with coverage data uploaded to Codecov Enterprise to see coverage data.
 
 Note: Additional documentation, if needed, can be found in [Codecov's official documentation](https://docs.codecov.io/docs/browser-extension#section-additional-steps-for-on-premises-codecov-customers).
 
