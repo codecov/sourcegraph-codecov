@@ -8,7 +8,9 @@ import {
 import { resolveEndpoint, resolveSettings, Settings } from './settings'
 import { codecovParamsForRepositoryCommit, resolveURI } from './uri'
 
-const decorationType = sourcegraph.app.createDecorationType && sourcegraph.app.createDecorationType()
+const decorationType =
+    sourcegraph.app.createDecorationType &&
+    sourcegraph.app.createDecorationType()
 
 /** Entrypoint for the Codecov Sourcegraph extension. */
 export function activate(): void {
@@ -74,7 +76,9 @@ export function activate(): void {
         } = {}
 
         const p = codecovParamsForRepositoryCommit(lastURI, sourcegraph)
-        const repoURL = `${p.baseURL || 'https://codecov.io'}/${p.service}/${p.owner}/${p.repo}`
+        const repoURL = `${p.baseURL || 'https://codecov.io'}/${p.service}/${
+            p.owner
+        }/${p.repo}`
         context['codecov.repoURL'] = repoURL
         const baseFileURL = `${repoURL}/src/${p.sha}`
         context['codecov.commitURL'] = `${repoURL}/commit/${p.sha}`
@@ -92,7 +96,11 @@ export function activate(): void {
 
             // Store coverage ratio (and Codecov report URL) for each file at this commit so that
             // template strings in contributions can refer to these values.
-            const fileRatios = await getFileCoverageRatios(lastURI, endpoint, sourcegraph)
+            const fileRatios = await getFileCoverageRatios(
+                lastURI,
+                endpoint,
+                sourcegraph
+            )
             for (const [path, ratio] of Object.entries(fileRatios)) {
                 const uri = `git://${lastURI.repo}?${lastURI.rev}#${path}`
                 context[`codecov.coverageRatio.${uri}`] = ratio.toFixed(0)
@@ -109,35 +117,40 @@ export function activate(): void {
         sourcegraph.workspace.onDidChangeRoots.subscribe(() => updateContext())
     }
 
-    sourcegraph.commands.registerCommand('codecov.setupEnterprise', async () => {
-        const endpoint = resolveEndpoint(
-            sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
-        )
-        if (!sourcegraph.app.activeWindow) {
-            throw new Error(
-                'To set a Codecov Endpoint, navigate to a file and then re-run this command.'
+    sourcegraph.commands.registerCommand(
+        'codecov.setupEnterprise',
+        async () => {
+            const endpoint = resolveEndpoint(
+                sourcegraph.configuration
+                    .get<Settings>()
+                    .get('codecov.endpoints')
             )
+            if (!sourcegraph.app.activeWindow) {
+                throw new Error(
+                    'To set a Codecov Endpoint, navigate to a file and then re-run this command.'
+                )
+            }
+
+            const service = await sourcegraph.app.activeWindow.showInputBox({
+                prompt: `Version control type (gh/ghe/bb/gl):`,
+                value: endpoint.service || '',
+            })
+
+            const url = await sourcegraph.app.activeWindow.showInputBox({
+                prompt: `Codecov endpoint:`,
+                value: endpoint.url || '',
+            })
+
+            if (url !== undefined && service !== undefined) {
+                // TODO: Only supports setting the token of the first API endpoint.
+                return sourcegraph.configuration
+                    .get<Settings>()
+                    .update('codecov.endpoints', [
+                        { ...endpoint, url, service },
+                    ])
+            }
         }
-
-        const service = await sourcegraph.app.activeWindow.showInputBox({
-            prompt: `Version control type (gh/ghe/bb/gl):`,
-            value: endpoint.service || '',
-        })
-
-        const url = await sourcegraph.app.activeWindow.showInputBox({
-            prompt: `Codecov endpoint:`,
-            value: endpoint.url || '',
-        })
-
-        if (url !== undefined && service !== undefined) {
-            // TODO: Only supports setting the token of the first API endpoint.
-            return sourcegraph.configuration
-                .get<Settings>()
-                .update('codecov.endpoints', [
-                    { ...endpoint, url, service },
-                ])
-        }
-    })
+    )
 
     // Handle the "Set Codecov API token" command (show the user a prompt for their token, and save
     // their input to settings).
@@ -161,9 +174,7 @@ export function activate(): void {
             // TODO: Only supports setting the token of the first API endpoint.
             return sourcegraph.configuration
                 .get<Settings>()
-                .update('codecov.endpoints', [
-                    { ...endpoint, token },
-                ])
+                .update('codecov.endpoints', [{ ...endpoint, token }])
         }
     })
 }

@@ -233,7 +233,8 @@
   },
   "main": "dist/extension.js",
   "scripts": {
-    "prettier": "prettier '**/*.{js?(on),ts}' --write --list-different",
+    "prettier": "prettier 'src/**/*.{js?(on),ts}' --write --list-different",
+    "prettier:check": "npm run prettier -- --write=false",
     "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
     "tslint:fix": "npm run tslint -- --fix",
     "typecheck": "tsc -p tsconfig.json",
