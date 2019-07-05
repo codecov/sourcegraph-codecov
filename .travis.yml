@@ -9,4 +9,6 @@ script:
   - npm run typecheck
   - npm run tslint
   - npm run prettier:check
-  - npm run test
+  - npm run cover
+  - nyc report --reporter json
+  - 'bash <(curl -s https://codecov.io/bash)'
