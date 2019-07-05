@@ -4,3 +4,9 @@ sudo: false
 
 node_js:
   - "10"
+
+script:
+  - npm run typecheck
+  - npm run tslint
+  - npm run prettier:check
+  - npm run test
