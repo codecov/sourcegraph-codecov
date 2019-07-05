@@ -12,7 +12,7 @@ export interface Settings {
 }
 
 /** Returns a copy of the extension settings with values normalized and defaults applied. */
-export function resolveSettings(raw: Partial<Settings>): Settings {
+export function resolveSettings (raw: Partial<Settings>): Settings {
     return {
         ['codecov.showCoverage']: raw['codecov.showCoverage'] !== false,
         ['codecov.decorations.lineCoverage']: !!raw[
@@ -26,7 +26,7 @@ export function resolveSettings(raw: Partial<Settings>): Settings {
 }
 
 export interface Endpoint {
-    url?: string
+    url: string
     token?: string
     service?: string
 }
@@ -39,7 +39,7 @@ const CODECOV_IO_URL = 'https://codecov.io'
  *
  * @todo support more than 1 endpoint
  */
-export function resolveEndpoint(
+export function resolveEndpoint (
     endpoints?: Readonly<Endpoint[]>
 ): Readonly<Endpoint> {
     if (!endpoints || endpoints.length === 0) {
@@ -54,7 +54,7 @@ export function resolveEndpoint(
     }
 }
 
-function urlWithOnlyProtocolAndHost(urlStr: string): string {
+function urlWithOnlyProtocolAndHost (urlStr: string): string {
     const url = new URL(urlStr)
     return `${url.protocol}//${url.host}`
 }

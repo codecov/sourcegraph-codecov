@@ -11,10 +11,11 @@ export type LineCoverage = number | { hits: number; branches: number } | null
 /** Gets the coverage ratio for a commit. */
 export async function getCommitCoverageRatio(
     { repo, rev }: Pick<ResolvedURI, 'repo' | 'rev'>,
-    endpoint: Endpoint
+    endpoint: Endpoint,
+    sourcegraph: typeof import('sourcegraph')
 ): Promise<number | undefined> {
     const data = await codecovGetCommitCoverage({
-        ...codecovParamsForRepositoryCommit({ repo, rev }),
+        ...codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph),
         baseURL: endpoint.url,
         token: endpoint.token,
     })
@@ -24,10 +25,11 @@ export async function getCommitCoverageRatio(
 /** Gets line coverage data for a file at a given commit in a repository. */
 export async function getFileLineCoverage(
     { repo, rev, path }: ResolvedURI,
-    endpoint: Endpoint
+    endpoint: Endpoint,
+    sourcegraph: typeof import('sourcegraph')
 ): Promise<FileLineCoverage> {
     const data = await codecovGetCommitCoverage({
-        ...codecovParamsForRepositoryCommit({ repo, rev }),
+        ...codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph),
         baseURL: endpoint.url,
         token: endpoint.token,
     })
@@ -37,10 +39,11 @@ export async function getFileLineCoverage(
 /** Gets the file coverage ratios for all files at a given commit in a repository. */
 export async function getFileCoverageRatios(
     { repo, rev }: Pick<ResolvedURI, 'repo' | 'rev'>,
-    endpoint: Endpoint
+    endpoint: Endpoint,
+    sourcegraph: typeof import('sourcegraph')
 ): Promise<{ [path: string]: number }> {
     const data = await codecovGetCommitCoverage({
-        ...codecovParamsForRepositoryCommit({ repo, rev }),
+        ...codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph),
         baseURL: endpoint.url,
         token: endpoint.token,
     })

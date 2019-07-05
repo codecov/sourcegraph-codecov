@@ -268,20 +268,20 @@
     "last 1 Safari versions"
   ],
   "devDependencies": {
-    "@types/mocha": "^5.2.3",
-    "@types/node": "^10.5.3",
+    "@sourcegraph/extension-api-stubs": "^0.2.2",
+    "@types/mocha": "^5.2.7",
+    "@types/node": "^10.14.10",
     "lnfs-cli": "^2.1.0",
     "mkdirp": "^0.5.1",
     "mocha": "^5.2.0",
     "nyc": "^12.0.2",
-    "parcel-bundler": "^1.10.0",
-    "prettier": "^1.13.7",
-    "source-map-support": "^0.5.6",
-    "sourcegraph": "^20.1.0",
-    "ts-node": "^7.0.0",
-    "tslint": "^5.10.0",
+    "parcel-bundler": "^1.12.3",
+    "prettier": "^1.18.2",
+    "source-map-support": "^0.5.12",
+    "sourcegraph": "^23.0.1",
+    "ts-node": "^7.0.1",
+    "tslint": "^5.18.0",
     "tslint-language-service": "^0.9.9",
-    "typescript": "^3.2.2"
-  },
-  "dependencies": {}
+    "typescript": "^3.5.2"
+  }
 }
