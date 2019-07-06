@@ -1,71 +1,81 @@
 import { createStubSourcegraphAPI } from '@sourcegraph/extension-api-stubs'
 import * as assert from 'assert'
-import {
-    resolveURI,
-    codecovParamsForRepositoryCommit,
-} from './uri'
+import { codecovParamsForRepositoryCommit, resolveURI } from './uri'
 
 describe('resolveURI', () => {
-
-    const UNSUPPORTED_SCHEMES = [
-        'file:',
-        'http:',
-        'https:'
-    ]
+    const UNSUPPORTED_SCHEMES = ['file:', 'http:', 'https:']
 
     for (const p of UNSUPPORTED_SCHEMES) {
         it(`throws for ${p} uris`, () => {
-            assert.throws(() => resolveURI('git://github.com/sourcegraph/sourcegraph'), `Invalid protocol: ${p}`)
+            assert.throws(
+                () => resolveURI('git://github.com/sourcegraph/sourcegraph'),
+                `Invalid protocol: ${p}`
+            )
         })
     }
 
     it('throws if url.search is falsy', () => {
-        assert.throws(() => resolveURI('git://github.com/sourcegraph/sourcegraph'))
+        assert.throws(() =>
+            resolveURI('git://github.com/sourcegraph/sourcegraph')
+        )
     })
 
     it('throws if url.hash is falsy', () => {
-        assert.throws(() => resolveURI('git://github.com/sourcegraph/sourcegraph'))
+        assert.throws(() =>
+            resolveURI('git://github.com/sourcegraph/sourcegraph')
+        )
     })
 
     it('resolves git: URIs', () => {
         assert.deepStrictEqual(
-            resolveURI('git://github.com/sourcegraph/sourcegraph?a8215fe4bd9571b43d7a03277069445adca85b2a#pkg/extsvc/github/codehost.go'),
+            resolveURI(
+                'git://github.com/sourcegraph/sourcegraph?a8215fe4bd9571b43d7a03277069445adca85b2a#pkg/extsvc/github/codehost.go'
+            ),
             {
                 path: 'pkg/extsvc/github/codehost.go',
                 repo: 'github.com/sourcegraph/sourcegraph',
-                rev: 'a8215fe4bd9571b43d7a03277069445adca85b2a'
+                rev: 'a8215fe4bd9571b43d7a03277069445adca85b2a',
             }
         )
     })
-
 })
 
 describe('codecovParamsForRepo', () => {
-
     const sourcegraph = createStubSourcegraphAPI()
 
     it('handles valid GitHub.com repositories', () =>
         assert.deepStrictEqual(
-            codecovParamsForRepositoryCommit({
-                repo: 'github.com/owner/repo',
-                rev: 'v',
-            }, sourcegraph),
-            { baseURL: '', service: 'gh', owner: 'owner', repo: 'repo', sha: 'v' }
+            codecovParamsForRepositoryCommit(
+                {
+                    repo: 'github.com/owner/repo',
+                    rev: 'v',
+                },
+                sourcegraph
+            ),
+            {
+                baseURL: '',
+                service: 'gh',
+                owner: 'owner',
+                repo: 'repo',
+                sha: 'v',
+            }
         ))
 
     it('defaults to gh when the service cannot be determined', () =>
         assert.deepStrictEqual(
-            codecovParamsForRepositoryCommit({
-                repo: 'example.com/owner/repo',
-                rev: 'v',
-            }, sourcegraph),
+            codecovParamsForRepositoryCommit(
+                {
+                    repo: 'example.com/owner/repo',
+                    rev: 'v',
+                },
+                sourcegraph
+            ),
             {
                 baseURL: '',
                 owner: 'owner',
                 repo: 'repo',
                 service: 'gh',
-                sha: 'v'
+                sha: 'v',
             }
-        )
-    )
+        ))
 })

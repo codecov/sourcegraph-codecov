@@ -233,8 +233,10 @@
   },
   "main": "dist/extension.js",
   "scripts": {
-    "prettier": "prettier '**/*.{js?(on),ts}' --write --list-different",
+    "prettier": "prettier 'src/**/*.{js?(on),ts}' --write --list-different",
+    "prettier:check": "npm run prettier -- --write=false",
     "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
+    "tslint:fix": "npm run tslint -- --fix",
     "typecheck": "tsc -p tsconfig.json",
     "build": "parcel build --out-file extension.js src/extension.ts",
     "serve": "npm run symlink-package && parcel serve --no-hmr --no-source-maps --out-file extension.js src/extension.ts",
@@ -248,17 +250,16 @@
   },
   "nyc": {
     "extension": [
+      ".tsx",
       ".ts"
     ],
-    "exclude": [
-      "**/*.d.ts",
-      "**/*.test.ts",
-      "**/*.js"
+    "include": [
+      "src/**/*.ts?(x)"
     ],
-    "cache": true,
-    "reporter": [
-      "text",
-      "lcovonly"
+    "exclude": [
+      "**/*.test.ts?(x)",
+      "**/*.d.ts",
+      "**/*.js"
     ]
   },
   "browserslist": [
@@ -269,6 +270,7 @@
   ],
   "devDependencies": {
     "@sourcegraph/extension-api-stubs": "^0.2.2",
+    "@sourcegraph/tslint-config": "^13.3.0",
     "@types/mocha": "^5.2.7",
     "@types/node": "^10.14.10",
     "lnfs-cli": "^2.1.0",

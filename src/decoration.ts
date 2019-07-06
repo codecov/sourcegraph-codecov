@@ -1,7 +1,7 @@
-import { LineCoverage, FileLineCoverage } from './model'
-import { Settings } from './settings'
+import { Range, TextDocumentDecoration } from 'sourcegraph'
 import { hsl } from './colors'
-import { TextDocumentDecoration, Range } from 'sourcegraph'
+import { FileLineCoverage, LineCoverage } from './model'
+import { Settings } from './settings'
 
 export function codecovToDecorations(
     settings: Pick<
@@ -46,14 +46,11 @@ export function codecovToDecorations(
 function lineColor(coverage: LineCoverage, lightness: number): string {
     if (coverage === 0 || coverage === null) {
         return hsl(0, 1, lightness) // red
-    } else if (
-        typeof coverage === 'number' ||
-        coverage.hits === coverage.branches
-    ) {
-        return hsl(120, 0.64, lightness) // green
-    } else {
-        return hsl(62, 0.97, lightness) // partially covered, yellow
     }
+    if (typeof coverage === 'number' || coverage.hits === coverage.branches) {
+        return hsl(120, 0.64, lightness) // green
+    }
+    return hsl(62, 0.97, lightness) // partially covered, yellow
 }
 
 function lineText(
