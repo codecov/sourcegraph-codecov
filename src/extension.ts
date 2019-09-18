@@ -6,7 +6,11 @@ import {
     getFileLineCoverage,
 } from './model'
 import { resolveEndpoint, resolveSettings, Settings } from './settings'
-import { codecovParamsForRepositoryCommit, resolveFileURI, resolveRootURI } from './uri'
+import {
+    codecovParamsForRepositoryCommit,
+    resolveFileURI,
+    resolveURI,
+} from './uri'
 
 const decorationType =
     sourcegraph.app.createDecorationType &&
@@ -66,7 +70,7 @@ export function activate(): void {
         } else {
             return
         }
-        const lastURI = resolveRootURI(uri)
+        const lastURI = resolveURI(uri)
         const endpoint = resolveEndpoint(
             sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
         )

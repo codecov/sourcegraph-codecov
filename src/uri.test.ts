@@ -8,7 +8,8 @@ describe('resolveFileURI', () => {
     for (const p of UNSUPPORTED_SCHEMES) {
         it(`throws for ${p} uris`, () => {
             assert.throws(
-                () => resolveFileURI('git://github.com/sourcegraph/sourcegraph'),
+                () =>
+                    resolveFileURI('git://github.com/sourcegraph/sourcegraph'),
                 `Invalid protocol: ${p}`
             )
         })

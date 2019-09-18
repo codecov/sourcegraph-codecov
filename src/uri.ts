@@ -16,7 +16,11 @@ export interface ResolvedFileURI extends ResolvedURI {
     path: string
 }
 
-function resolveURI(url: URL): ResolvedURI {
+/**
+ * Resolve a URI of the forms git://github.com/owner/repo?rev, using the given base (root) URI.
+ */
+export function resolveURI(uri: string): ResolvedURI {
+    const url = new URL(uri)
     if (url.protocol !== 'git:') {
         throw new Error(`Unsupported protocol: ${url.protocol}`)
     }
@@ -32,19 +36,10 @@ function resolveURI(url: URL): ResolvedURI {
  * Resolve a URI of the forms git://github.com/owner/repo?rev#path and file:///path to an absolute reference
  */
 export function resolveFileURI(uri: string): ResolvedFileURI {
-    const url = new URL(uri)
-    const path = url.hash.slice(1)
     return {
-        ...resolveURI(url),
-        path,
+        ...resolveURI(uri),
+        path: new URL(uri).hash.slice(1),
     }
-}
-
-/**
- * Resolve a URI of the forms git://github.com/owner/repo?rev, using the given base (root) URI.
- */
-export function resolveRootURI(uri: string): ResolvedURI {
-    return resolveURI(new URL(uri))
 }
 
 export interface KnownHost {

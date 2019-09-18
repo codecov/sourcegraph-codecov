@@ -1,6 +1,10 @@
 import { CodecovCommitData, codecovGetCommitCoverage } from './api'
 import { Endpoint } from './settings'
-import { codecovParamsForRepositoryCommit, ResolvedFileURI, ResolvedURI } from './uri'
+import {
+    codecovParamsForRepositoryCommit,
+    ResolvedFileURI,
+    ResolvedURI,
+} from './uri'
 
 export interface FileLineCoverage {
     [line: string]: LineCoverage
