@@ -17,7 +17,7 @@ export interface ResolvedDocumentURI extends ResolvedRootURI {
 }
 
 /**
- * Resolve a URI of the forms git://github.com/owner/repo?rev, using the given base (root) URI.
+ * Resolve a URI of the form git://github.com/owner/repo?rev to an absolute reference.
  */
 export function resolveRootURI(uri: string): ResolvedRootURI {
     const url = new URL(uri)
@@ -33,7 +33,7 @@ export function resolveRootURI(uri: string): ResolvedRootURI {
 }
 
 /**
- * Resolve a URI of the forms git://github.com/owner/repo?rev#path and file:///path to an absolute reference
+ * Resolve a URI of the form git://github.com/owner/repo?rev#path to an absolute reference.
  */
 export function resolveDocumentURI(uri: string): ResolvedDocumentURI {
     return {
