@@ -7,7 +7,7 @@ import { Endpoint, Settings } from './settings'
 export interface ResolvedURI {
     repo: string
     rev: string
-    path: string
+    path?: string
 }
 
 /**
@@ -24,11 +24,8 @@ export function resolveURI(uri: string): ResolvedURI {
     if (!rev) {
         throw new Error('Could not determine revision')
     }
-    const path = url.hash.slice(1)
-    console.log(uri, path)
-    if (!path) {
-        throw new Error('Could not determine file path')
-    }
+    const path = url.hash.slice(1) || undefined
+
     return {
         repo,
         rev,
