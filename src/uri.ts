@@ -2,19 +2,24 @@ import { CodecovGetCommitCoverageArgs } from './api'
 import { Endpoint, Settings } from './settings'
 
 /**
- * A resolved URI identifies a path in a repository at a specific revision.
+ * A resolved URI without an identified path.
  */
-export interface ResolvedURI {
+export interface ResolvedRootURI {
     repo: string
     rev: string
+}
+
+/**
+ * A resolved URI with an identified path in a repository at a specific revision.
+ */
+export interface ResolvedDocumentURI extends ResolvedRootURI {
     path: string
 }
 
 /**
- * Resolve a URI of the forms git://github.com/owner/repo?rev#path and file:///path to an absolute reference, using
- * the given base (root) URI.
+ * Resolve a URI of the form git://github.com/owner/repo?rev to an absolute reference.
  */
-export function resolveURI(uri: string): ResolvedURI {
+export function resolveRootURI(uri: string): ResolvedRootURI {
     const url = new URL(uri)
     if (url.protocol !== 'git:') {
         throw new Error(`Unsupported protocol: ${url.protocol}`)
@@ -24,15 +29,16 @@ export function resolveURI(uri: string): ResolvedURI {
     if (!rev) {
         throw new Error('Could not determine revision')
     }
-    const path = url.hash.slice(1)
-    console.log(uri, path)
-    if (!path) {
-        throw new Error('Could not determine file path')
-    }
+    return { repo, rev }
+}
+
+/**
+ * Resolve a URI of the form git://github.com/owner/repo?rev#path to an absolute reference.
+ */
+export function resolveDocumentURI(uri: string): ResolvedDocumentURI {
     return {
-        repo,
-        rev,
-        path,
+        ...resolveRootURI(uri),
+        path: new URL(uri).hash.slice(1),
     }
 }
 
@@ -47,7 +53,7 @@ export interface KnownHost {
  * Currently only GitHub.com repositories are supported.
  */
 export function codecovParamsForRepositoryCommit(
-    uri: Pick<ResolvedURI, 'repo' | 'rev'>,
+    uri: Pick<ResolvedRootURI, 'repo' | 'rev'>,
     sourcegraph: typeof import('sourcegraph')
 ): Pick<
     CodecovGetCommitCoverageArgs,
