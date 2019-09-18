@@ -2,20 +2,21 @@ import { CodecovGetCommitCoverageArgs } from './api'
 import { Endpoint, Settings } from './settings'
 
 /**
- * A resolved URI identifies a path in a repository at a specific revision.
+ * A resolved URI without an identified path.
  */
 export interface ResolvedURI {
     repo: string
     rev: string
-    path?: string
 }
 
 /**
- * Resolve a URI of the forms git://github.com/owner/repo?rev#path and file:///path to an absolute reference, using
- * the given base (root) URI.
+ * A resolved URI with an identified path in a repository at a specific revision.
  */
-export function resolveURI(uri: string): ResolvedURI {
-    const url = new URL(uri)
+export interface ResolvedFileURI extends ResolvedURI {
+    path: string
+}
+
+function resolveURI(url: URL): ResolvedURI {
     if (url.protocol !== 'git:') {
         throw new Error(`Unsupported protocol: ${url.protocol}`)
     }
@@ -24,13 +25,26 @@ export function resolveURI(uri: string): ResolvedURI {
     if (!rev) {
         throw new Error('Could not determine revision')
     }
-    const path = url.hash.slice(1) || undefined
+    return { repo, rev }
+}
 
+/**
+ * Resolve a URI of the forms git://github.com/owner/repo?rev#path and file:///path to an absolute reference
+ */
+export function resolveFileURI(uri: string): ResolvedFileURI {
+    const url = new URL(uri)
+    const path = url.hash.slice(1)
     return {
-        repo,
-        rev,
+        ...resolveURI(url),
         path,
     }
+}
+
+/**
+ * Resolve a URI of the forms git://github.com/owner/repo?rev, using the given base (root) URI.
+ */
+export function resolveRootURI(uri: string): ResolvedURI {
+    return resolveURI(new URL(uri))
 }
 
 export interface KnownHost {

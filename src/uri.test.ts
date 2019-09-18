@@ -1,14 +1,14 @@
 import { createStubSourcegraphAPI } from '@sourcegraph/extension-api-stubs'
 import * as assert from 'assert'
-import { codecovParamsForRepositoryCommit, resolveURI } from './uri'
+import { codecovParamsForRepositoryCommit, resolveFileURI } from './uri'
 
-describe('resolveURI', () => {
+describe('resolveFileURI', () => {
     const UNSUPPORTED_SCHEMES = ['file:', 'http:', 'https:']
 
     for (const p of UNSUPPORTED_SCHEMES) {
         it(`throws for ${p} uris`, () => {
             assert.throws(
-                () => resolveURI('git://github.com/sourcegraph/sourcegraph'),
+                () => resolveFileURI('git://github.com/sourcegraph/sourcegraph'),
                 `Invalid protocol: ${p}`
             )
         })
@@ -16,19 +16,19 @@ describe('resolveURI', () => {
 
     it('throws if url.search is falsy', () => {
         assert.throws(() =>
-            resolveURI('git://github.com/sourcegraph/sourcegraph')
+            resolveFileURI('git://github.com/sourcegraph/sourcegraph')
         )
     })
 
     it('throws if url.hash is falsy', () => {
         assert.throws(() =>
-            resolveURI('git://github.com/sourcegraph/sourcegraph')
+            resolveFileURI('git://github.com/sourcegraph/sourcegraph')
         )
     })
 
     it('resolves git: URIs', () => {
         assert.deepStrictEqual(
-            resolveURI(
+            resolveFileURI(
                 'git://github.com/sourcegraph/sourcegraph?a8215fe4bd9571b43d7a03277069445adca85b2a#pkg/extsvc/github/codehost.go'
             ),
             {
