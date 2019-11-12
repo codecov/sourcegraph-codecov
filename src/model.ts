@@ -17,13 +17,18 @@ export async function getCommitCoverageRatio(
     { repo, rev }: Pick<ResolvedRootURI, 'repo' | 'rev'>,
     endpoint: Endpoint,
     sourcegraph: typeof import('sourcegraph')
-): Promise<number | undefined> {
+): Promise<number | null | undefined> {
     const data = await codecovGetCommitCoverage({
         ...codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph),
         baseURL: endpoint.url,
         token: endpoint.token,
     })
-    return data.commit.totals.coverage
+
+    if (data.commit && data.commit.totals && data.commit.totals.coverage) {
+        return data.commit.totals.coverage
+    } else {
+        return null
+    }
 }
 
 /** Gets line coverage data for a file at a given commit in a repository. */
