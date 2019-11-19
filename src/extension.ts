@@ -1,11 +1,11 @@
 import { BehaviorSubject, combineLatest, from, Subscription } from 'rxjs'
 import {
+    catchError,
+    concatMap,
     filter,
     map,
     startWith,
     switchMap,
-    concatMap,
-    catchError,
 } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import { codecovToDecorations } from './decoration'
