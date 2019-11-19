@@ -1,12 +1,5 @@
 import { BehaviorSubject, combineLatest, from, Subscription } from 'rxjs'
-import {
-    catchError,
-    concatMap,
-    filter,
-    map,
-    startWith,
-    switchMap,
-} from 'rxjs/operators'
+import { concatMap, filter, map, startWith, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import { codecovToDecorations } from './decoration'
 import {
@@ -102,10 +95,12 @@ export function activate(
     context.subscriptions.add(
         combineLatest([configurationChanges, editorsChanges])
             .pipe(
-                concatMap(([settings, editors]) => decorate(settings, editors)),
-                catchError(err => {
-                    console.error('Codecov: decoration error', err)
-                    return []
+                concatMap(async ([settings, editors]) => {
+                    try {
+                        await decorate(settings, editors)
+                    } catch (err) {
+                        console.error('Codecov: decoration error', err)
+                    }
                 })
             )
             .subscribe()
@@ -189,15 +184,14 @@ export function activate(
                 startWith(sourcegraph.workspace.roots)
             ),
             editorsChanges,
-            // tslint:disable-next-line: rxjs-no-async-subscribe
         ])
             .pipe(
-                concatMap(([endpoints, roots, editors]) =>
-                    updateContext(endpoints, roots, editors)
-                ),
-                catchError(err => {
-                    console.error('Codecov: error updating context', err)
-                    return []
+                concatMap(async ([endpoints, roots, editors]) => {
+                    try {
+                        await updateContext(endpoints, roots, editors)
+                    } catch (err) {
+                        console.error('Codecov: error updating context', err)
+                    }
                 })
             )
             .subscribe()
