@@ -1,5 +1,12 @@
 import { BehaviorSubject, combineLatest, from, Subscription } from 'rxjs'
-import { filter, map, startWith, switchMap } from 'rxjs/operators'
+import {
+    filter,
+    map,
+    startWith,
+    switchMap,
+    concatMap,
+    catchError,
+} from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import { codecovToDecorations } from './decoration'
 import {
@@ -36,7 +43,9 @@ export function activate(
     const editorsChanges = sourcegraph.app.activeWindowChanges
         ? from(sourcegraph.app.activeWindowChanges).pipe(
               filter(
-                  (activeWindow): activeWindow is sourcegraph.Window =>
+                  (
+                      activeWindow
+                  ): activeWindow is Exclude<typeof activeWindow, undefined> =>
                       activeWindow !== undefined
               ),
               switchMap(activeWindow =>
@@ -91,17 +100,15 @@ export function activate(
         )
     )
     context.subscriptions.add(
-        combineLatest([
-            configurationChanges,
-            editorsChanges,
-            // tslint:disable-next-line: rxjs-no-async-subscribe
-        ]).subscribe(async ([settings, editors]) => {
-            try {
-                await decorate(settings, editors)
-            } catch (err) {
-                console.error('Codecov: decoration error', err)
-            }
-        })
+        combineLatest([configurationChanges, editorsChanges])
+            .pipe(
+                concatMap(([settings, editors]) => decorate(settings, editors)),
+                catchError(err => {
+                    console.error('Codecov: decoration error', err)
+                    return []
+                })
+            )
+            .subscribe()
     )
 
     // Set context values referenced in template expressions in the extension manifest (e.g., to interpolate "N" in
@@ -173,24 +180,27 @@ export function activate(
             configurationChanges.pipe(
                 map(settings => settings['codecov.endpoints'])
             ),
-            // Backcompat: rely on onDidChangeRoots if the extension host doesn't support rootChanges.
             from(
-                sourcegraph.workspace.rootChanges
-                    ? sourcegraph.workspace.roots
-                    : sourcegraph.workspace.onDidChangeRoots
+                // Backcompat: rely on onDidChangeRoots if the extension host doesn't support rootChanges.
+                sourcegraph.workspace.rootChanges ||
+                    sourcegraph.workspace.onDidChangeRoots
             ).pipe(
                 map(() => sourcegraph.workspace.roots),
                 startWith(sourcegraph.workspace.roots)
             ),
             editorsChanges,
             // tslint:disable-next-line: rxjs-no-async-subscribe
-        ]).subscribe(async ([endpoints, roots, editors]) => {
-            try {
-                await updateContext(endpoints, roots, editors)
-            } catch (err) {
-                console.error('codecov: error updating context', err)
-            }
-        })
+        ])
+            .pipe(
+                concatMap(([endpoints, roots, editors]) =>
+                    updateContext(endpoints, roots, editors)
+                ),
+                catchError(err => {
+                    console.error('Codecov: error updating context', err)
+                    return []
+                })
+            )
+            .subscribe()
     )
 
     sourcegraph.commands.registerCommand(
