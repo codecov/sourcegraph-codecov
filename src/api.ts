@@ -74,11 +74,24 @@ export interface CodecovCommitData {
  * See https://docs.codecov.io/v5.0.0/reference#section-get-a-single-commit.
  */
 export const codecovGetCommitCoverage = memoizeAsync(
-    async (args: CodecovGetCommitCoverageArgs): Promise<CodecovCommitData> =>
-        (await fetch(commitCoverageURL(args), {
+    async (
+        args: CodecovGetCommitCoverageArgs
+    ): Promise<CodecovCommitData | null> => {
+        const response = await fetch(commitCoverageURL(args), {
             method: 'GET',
             mode: 'cors',
-        })).json(),
+        })
+        if (response.status === 404) {
+            console.warn(
+                `No Codecov coverage found for ${args.owner}/${args.repo}@${args.sha}`
+            )
+            return null
+        }
+        if (!response.ok) {
+            throw new Error('Error while getting Codecov commit data')
+        }
+        return await response.json()
+    },
     commitCoverageURL
 )
 

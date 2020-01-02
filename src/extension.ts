@@ -72,6 +72,9 @@ export function activate(
                 resolvedSettings['codecov.endpoints'][0],
                 sourcegraph
             )
+            if (!decorations) {
+                continue
+            }
             editor.setDecorations(
                 decorationType,
                 codecovToDecorations(settings, decorations)
@@ -147,12 +150,6 @@ export function activate(
                 endpoint,
                 sourcegraph
             )
-
-            if (commitCoverage === null) {
-                console.log('No Codecov coverage found')
-                return
-            }
-
             context['codecov.commitCoverage'] = commitCoverage
                 ? commitCoverage.toFixed(1)
                 : null
@@ -164,10 +161,12 @@ export function activate(
                 endpoint,
                 sourcegraph
             )
-            for (const [path, ratio] of Object.entries(fileRatios)) {
-                const uri = `git://${lastURI.repo}?${lastURI.rev}#${path}`
-                context[`codecov.coverageRatio.${uri}`] = ratio.toFixed(0)
-                context[`codecov.fileURL.${uri}`] = `${baseFileURL}/${path}`
+            if (fileRatios) {
+                for (const [path, ratio] of Object.entries(fileRatios)) {
+                    const uri = `git://${lastURI.repo}?${lastURI.rev}#${path}`
+                    context[`codecov.coverageRatio.${uri}`] = ratio.toFixed(0)
+                    context[`codecov.fileURL.${uri}`] = `${baseFileURL}/${path}`
+                }
             }
         } catch (err) {
             console.error(`Error loading Codecov file coverage: ${err}`)
