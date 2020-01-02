@@ -24,7 +24,7 @@ export async function getCommitCoverageRatio(
         token: endpoint.token,
     })
     if (data === null) {
-        return data
+        return null
     }
     return data.commit.totals.coverage
 }
