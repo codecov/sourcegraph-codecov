@@ -17,12 +17,15 @@ export async function getCommitCoverageRatio(
     { repo, rev }: Pick<ResolvedRootURI, 'repo' | 'rev'>,
     endpoint: Endpoint,
     sourcegraph: typeof import('sourcegraph')
-): Promise<number | undefined> {
+): Promise<number | null | undefined> {
     const data = await codecovGetCommitCoverage({
         ...codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph),
         baseURL: endpoint.url,
         token: endpoint.token,
     })
+    if (data === null) {
+        return null
+    }
     return data.commit.totals.coverage
 }
 
@@ -31,12 +34,15 @@ export async function getFileLineCoverage(
     { repo, rev, path }: ResolvedDocumentURI,
     endpoint: Endpoint,
     sourcegraph: typeof import('sourcegraph')
-): Promise<FileLineCoverage> {
+): Promise<FileLineCoverage | null> {
     const data = await codecovGetCommitCoverage({
         ...codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph),
         baseURL: endpoint.url,
         token: endpoint.token,
     })
+    if (data === null) {
+        return null
+    }
     return toLineCoverage(data, path)
 }
 
@@ -45,12 +51,15 @@ export async function getFileCoverageRatios(
     { repo, rev }: Pick<ResolvedRootURI, 'repo' | 'rev'>,
     endpoint: Endpoint,
     sourcegraph: typeof import('sourcegraph')
-): Promise<{ [path: string]: number }> {
+): Promise<{ [path: string]: number } | null> {
     const data = await codecovGetCommitCoverage({
         ...codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph),
         baseURL: endpoint.url,
         token: endpoint.token,
     })
+    if (data === null) {
+        return null
+    }
     const ratios: { [path: string]: number } = {}
     for (const [path, fileData] of Object.entries(data.commit.report.files)) {
         const ratio = toCoverageRatio(fileData)
