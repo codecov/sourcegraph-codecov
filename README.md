@@ -1,6 +1,6 @@
 # Codecov Sourcegraph extension
 
-[![Build Status](https://travis-ci.org/codecov/sourcegraph-codecov.png)](https://travis-ci.org/codecov/sourcegraph-codecov)
+[![Build Status](https://travis-ci.org/codecov/sourcegraph-codecov.svg?branch=master)](https://travis-ci.org/codecov/sourcegraph-codecov)
 [![codecov](https://codecov.io/gh/codecov/sourcegraph-codecov/branch/master/graph/badge.svg)](https://codecov.io/gh/codecov/sourcegraph-codecov)
 
 A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing code coverage information from [Codecov](https://codecov.io) on GitHub, Sourcegraph, and other tools.
