@@ -3,7 +3,7 @@ import { memoizeAsync } from './memoizeAsync'
 
 interface ResolveRepoNameResponse {
     data?: {
-        repository?: {
+        repository: null | {
             uri: string
         }
     }
