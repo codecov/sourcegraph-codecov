@@ -30,7 +30,6 @@ export async function resolveRootURI(
     const rawRepo = (url.host + url.pathname).replace(/^\/*/, '')
     const repo = await resolveRepoName(rawRepo)
     const rev = url.search.slice(1)
-    console.log({ repo, rev })
     if (!rev) {
         throw new Error('Could not determine revision')
     }
