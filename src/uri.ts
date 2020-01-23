@@ -19,13 +19,18 @@ export interface ResolvedDocumentURI extends ResolvedRootURI {
 /**
  * Resolve a URI of the form git://github.com/owner/repo?rev to an absolute reference.
  */
-export function resolveRootURI(uri: string): ResolvedRootURI {
+export async function resolveRootURI(
+    uri: string,
+    resolveRepoName: (name: string) => Promise<string>
+): Promise<ResolvedRootURI> {
     const url = new URL(uri)
     if (url.protocol !== 'git:') {
         throw new Error(`Unsupported protocol: ${url.protocol}`)
     }
-    const repo = (url.host + url.pathname).replace(/^\/*/, '')
+    const rawRepo = (url.host + url.pathname).replace(/^\/*/, '')
+    const repo = await resolveRepoName(rawRepo)
     const rev = url.search.slice(1)
+    console.log({ repo, rev })
     if (!rev) {
         throw new Error('Could not determine revision')
     }
@@ -35,9 +40,12 @@ export function resolveRootURI(uri: string): ResolvedRootURI {
 /**
  * Resolve a URI of the form git://github.com/owner/repo?rev#path to an absolute reference.
  */
-export function resolveDocumentURI(uri: string): ResolvedDocumentURI {
+export async function resolveDocumentURI(
+    uri: string,
+    resolveRepoName: (name: string) => Promise<string>
+): Promise<ResolvedDocumentURI> {
     return {
-        ...resolveRootURI(uri),
+        ...(await resolveRootURI(uri, resolveRepoName)),
         path: new URL(uri).hash.slice(1),
     }
 }

@@ -2,6 +2,7 @@ import { BehaviorSubject, combineLatest, from, Subscription } from 'rxjs'
 import { concatMap, filter, map, startWith, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import { codecovToDecorations } from './decoration'
+import { resolveRepoName } from './graphql'
 import {
     getCommitCoverageRatio,
     getFileCoverageRatios,
@@ -68,7 +69,7 @@ export function activate(
         const resolvedSettings = resolveSettings(settings)
         for (const editor of editors) {
             const decorations = await getFileLineCoverage(
-                resolveDocumentURI(editor.document.uri),
+                await resolveDocumentURI(editor.document.uri, resolveRepoName),
                 resolvedSettings['codecov.endpoints'][0],
                 sourcegraph
             )
@@ -128,7 +129,7 @@ export function activate(
         } else {
             return
         }
-        const lastURI = resolveRootURI(uri)
+        const lastURI = await resolveRootURI(uri, resolveRepoName)
         const endpoint = resolveEndpoint(endpoints)
 
         const context: {
