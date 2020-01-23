@@ -42,7 +42,7 @@ export const resolveRepoName = memoizeAsync(async (name: string): Promise<string
         }
         return uri
     } catch (err) {
-        console.warn(`Could not resolve repo name: ${err}`)
+        console.warn('Could not resolve repo name', err)
     }
     return name
 }, name => name)
