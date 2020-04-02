@@ -44,7 +44,8 @@
         "actionItem": {
           "label": "Coverage: ${get(context, `codecov.coverageRatio.${resource.uri}`)}%",
           "description": "${config.codecov.decorations.lineCoverage && \"Hide\" || \"Show\"} code coverage\nCmd/Ctrl+Click: View on Codecov",
-          "pressed": "config.codecov.decorations.lineCoverage"
+          "pressed": "config.codecov.decorations.lineCoverage",
+          "iconURL": "https://raw.githubusercontent.com/codecov/media/master/logos/logo.svg?sanitize=true"
         }
       },
       {
