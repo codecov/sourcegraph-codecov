@@ -1,3 +1,8 @@
+import { Observable } from 'rxjs'
+import { map } from 'rxjs/operators'
+import * as sourcegraph from 'sourcegraph'
+import { Service } from './api'
+
 /**
  * The resolved and normalized settings for this extension, the result of calling resolveSettings on a raw settings
  * value.
@@ -5,6 +10,7 @@
  * See the configuration JSON Schema in extension.json for the canonical documentation on these properties.
  */
 export interface Settings {
+    ['codecov.graphType']?: 'icicle' | 'tree' | 'sunburst'
     ['codecov.showCoverage']: boolean
     ['codecov.decorations.lineCoverage']: boolean
     ['codecov.decorations.lineHitCounts']: boolean
@@ -14,6 +20,7 @@ export interface Settings {
 /** Returns a copy of the extension settings with values normalized and defaults applied. */
 export function resolveSettings(raw: Partial<Settings>): Settings {
     return {
+        ['codecov.graphType']: raw['codecov.graphType'] || undefined,
         ['codecov.showCoverage']: raw['codecov.showCoverage'] !== false,
         ['codecov.decorations.lineCoverage']: !!raw[
             'codecov.decorations.lineCoverage'
@@ -28,10 +35,10 @@ export function resolveSettings(raw: Partial<Settings>): Settings {
 export interface Endpoint {
     url: string
     token?: string
-    service?: string
+    service?: Service
 }
 
-const CODECOV_IO_URL = 'https://codecov.io'
+export const CODECOV_IO_URL = 'https://codecov.io'
 
 /**
  * Returns the configured endpoint with values normalized and defaults applied.
@@ -57,3 +64,17 @@ function urlWithOnlyProtocolAndHost(urlStr: string): string {
     const url = new URL(urlStr)
     return `${url.protocol}//${url.host}`
 }
+
+/**
+ * The extension's resolved Settings.
+ */
+export const configurationChanges: Observable<Settings> = new Observable<void>(
+    observer =>
+        sourcegraph.configuration.subscribe(observer.next.bind(observer))
+).pipe(
+    map(() =>
+        resolveSettings(
+            sourcegraph.configuration.get<Partial<Settings>>().value
+        )
+    )
+)

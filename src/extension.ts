@@ -1,6 +1,7 @@
-import { BehaviorSubject, combineLatest, from, Subscription } from 'rxjs'
+import { combineLatest, from, Subscription } from 'rxjs'
 import { concatMap, filter, map, startWith, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
+import { Service } from './api'
 import { codecovToDecorations } from './decoration'
 import {
     getCommitCoverageRatio,
@@ -8,6 +9,7 @@ import {
     getFileLineCoverage,
 } from './model'
 import {
+    configurationChanges,
     Endpoint,
     resolveEndpoint,
     resolveSettings,
@@ -63,10 +65,13 @@ export function activate(
     // brief flicker of the old state when the file is reopened.
     async function decorate(
         settings: Readonly<Settings>,
-        editors: sourcegraph.CodeEditor[]
+        editors: sourcegraph.ViewComponent[]
     ): Promise<void> {
         const resolvedSettings = resolveSettings(settings)
         for (const editor of editors) {
+            if (editor.type !== 'CodeEditor') {
+                continue
+            }
             const decorations = await getFileLineCoverage(
                 resolveDocumentURI(editor.document.uri),
                 resolvedSettings['codecov.endpoints'][0],
@@ -82,19 +87,6 @@ export function activate(
         }
     }
 
-    /**
-     * A BehaviorSubject of the extension's resolved {@link Settings}.
-     */
-    const configurationChanges = new BehaviorSubject<Readonly<Settings>>(
-        sourcegraph.configuration.get<Settings>().value
-    )
-    context.subscriptions.add(
-        sourcegraph.configuration.subscribe(() =>
-            configurationChanges.next(
-                sourcegraph.configuration.get<Settings>().value
-            )
-        )
-    )
     context.subscriptions.add(
         combineLatest([configurationChanges, editorsChanges])
             .pipe(
@@ -116,7 +108,7 @@ export function activate(
     async function updateContext(
         endpoints: readonly Endpoint[] | undefined,
         roots: readonly sourcegraph.WorkspaceRoot[],
-        editors: sourcegraph.CodeEditor[]
+        editors: sourcegraph.ViewComponent[]
     ): Promise<void> {
         // Get the current repository. Sourcegraph 3.0-preview exposes sourcegraph.workspace.roots, but earlier
         // versions do not.
@@ -124,7 +116,11 @@ export function activate(
         if (roots && roots.length > 0) {
             uri = roots[0].uri.toString()
         } else if (editors.length > 0) {
-            uri = editors[0].document.uri
+            const editor = editors[0]
+            if (editor.type !== 'CodeEditor') {
+                return
+            }
+            uri = editor.document.uri
         } else {
             return
         }
@@ -231,7 +227,7 @@ export function activate(
                 return sourcegraph.configuration
                     .get<Settings>()
                     .update('codecov.endpoints', [
-                        { ...endpoint, url, service },
+                        { ...endpoint, url, service: service as Service },
                     ])
             }
         }

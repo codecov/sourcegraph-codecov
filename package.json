@@ -270,22 +270,24 @@
     "last 1 Safari versions"
   ],
   "devDependencies": {
-    "@sourcegraph/extension-api-stubs": "^0.2.2",
+    "@sourcegraph/extension-api-stubs": "^0.2.6",
     "@sourcegraph/tslint-config": "^13.3.0",
     "@types/mocha": "^5.2.7",
+    "@types/mock-require": "^2.0.0",
     "@types/node": "^10.14.10",
     "lnfs-cli": "^2.1.0",
     "mkdirp": "^0.5.1",
     "mocha": "^5.2.0",
+    "mock-require": "^3.0.3",
     "nyc": "^12.0.2",
     "parcel-bundler": "^1.12.3",
     "prettier": "^1.18.2",
     "rxjs": "^6.5.3",
     "source-map-support": "^0.5.12",
     "sourcegraph": "^23.0.1",
-    "ts-node": "^7.0.1",
+    "ts-node": "^8.9.1",
     "tslint": "^5.18.0",
     "tslint-language-service": "^0.9.9",
-    "typescript": "^3.5.2"
+    "typescript": "^3.8.3"
   }
 }

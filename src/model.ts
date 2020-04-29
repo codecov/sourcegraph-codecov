@@ -1,4 +1,4 @@
-import { CodecovCommitData, codecovGetCommitCoverage } from './api'
+import { CodecovCommitData, getCommitCoverage } from './api'
 import { Endpoint } from './settings'
 import {
     codecovParamsForRepositoryCommit,
@@ -18,7 +18,7 @@ export async function getCommitCoverageRatio(
     endpoint: Endpoint,
     sourcegraph: typeof import('sourcegraph')
 ): Promise<number | null | undefined> {
-    const data = await codecovGetCommitCoverage({
+    const data = await getCommitCoverage({
         ...codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph),
         baseURL: endpoint.url,
         token: endpoint.token,
@@ -35,7 +35,7 @@ export async function getFileLineCoverage(
     endpoint: Endpoint,
     sourcegraph: typeof import('sourcegraph')
 ): Promise<FileLineCoverage | null> {
-    const data = await codecovGetCommitCoverage({
+    const data = await getCommitCoverage({
         ...codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph),
         baseURL: endpoint.url,
         token: endpoint.token,
@@ -52,7 +52,7 @@ export async function getFileCoverageRatios(
     endpoint: Endpoint,
     sourcegraph: typeof import('sourcegraph')
 ): Promise<{ [path: string]: number } | null> {
-    const data = await codecovGetCommitCoverage({
+    const data = await getCommitCoverage({
         ...codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph),
         baseURL: endpoint.url,
         token: endpoint.token,

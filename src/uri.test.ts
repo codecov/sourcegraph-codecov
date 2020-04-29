@@ -1,4 +1,7 @@
 import { createStubSourcegraphAPI } from '@sourcegraph/extension-api-stubs'
+import mock from 'mock-require'
+mock('sourcegraph', createStubSourcegraphAPI())
+
 import * as assert from 'assert'
 import { codecovParamsForRepositoryCommit, resolveDocumentURI } from './uri'
 
@@ -56,11 +59,12 @@ describe('codecovParamsForRepo', () => {
                 sourcegraph
             ),
             {
-                baseURL: '',
+                baseURL: 'https://codecov.io',
                 service: 'gh',
                 owner: 'owner',
                 repo: 'repo',
                 sha: 'v',
+                token: undefined,
             }
         ))
 
@@ -74,11 +78,12 @@ describe('codecovParamsForRepo', () => {
                 sourcegraph
             ),
             {
-                baseURL: '',
+                baseURL: 'https://codecov.io',
                 owner: 'owner',
                 repo: 'repo',
                 service: 'gh',
                 sha: 'v',
+                token: undefined,
             }
         ))
 })

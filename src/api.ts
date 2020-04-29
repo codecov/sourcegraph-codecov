@@ -1,29 +1,55 @@
-/** The arguments for getCommitCoverage. */
-export interface CodecovGetCommitCoverageArgs {
-    /**
-     * The base URL of the Codecov instance.
-     * @example https://codecov.io
-     */
-    baseURL: string
+export type Service = 'gh' | 'ghe' | 'gl' | 'bb'
 
+export interface RepoSpec {
     /** The identifier for the service where the repository lives. */
-    service: string
+    service: Service
 
     /** The value for the :owner URL parameter (the repository's owner). */
     owner: string
 
     /** The value for the :repo URL parameter (the repository's name). */
     repo: string
+}
 
-    /** The value for the :sha URL parameter (the Git commit SHA). */
-    sha: string
+export interface APIOptions {
+    /**
+     * The base URL of the Codecov instance.
+     * @example https://codecov.io
+     */
+    baseURL: string
 
     /** The Codecov API token (required for private repositories). */
     token?: string
 }
 
+/**
+ * Codecov API parameters for a commit.
+ */
+export interface CommitSpec {
+    /** The value for the :sha URL parameter (the Git commit SHA). */
+    sha: string
+}
+export interface PathSpec {
+    path: string
+}
+
+export interface CodecovOwner {
+    /** An identifier for the code host or other service where the repository lives. */
+    service: 'github' | 'gitlab' | 'bitbucket'
+
+    /** For GitHub, the name of the repository's owner. */
+    username: string
+}
+
+export interface CodecovRepo {
+    /** The repository name (without the owner). */
+    name: string
+}
+
 /** The response data from the Codecov API for a commit. */
 export interface CodecovCommitData {
+    owner: CodecovOwner
+    repo: CodecovRepo
     commit: {
         commitid: string
         report: {
@@ -55,16 +81,16 @@ export interface CodecovCommitData {
             coverage: number
         }
     }
-    owner: {
-        /** An identifier for the code host or other service where the repository lives. */
-        service: 'github' | 'gitlab' | 'bitbucket'
+}
 
-        /** For GitHub, the name of the repository's owner. */
-        username: string
-    }
-    repo: {
-        /** The repository name (without the owner). */
-        name: string
+export interface CodecovTreeData {
+    owner: CodecovOwner
+    repo: CodecovRepo
+    commit: {
+        folder_totals: {
+            /** Coverage as a stringified float. */
+            coverage: string
+        }
     }
 }
 
@@ -73,11 +99,11 @@ export interface CodecovCommitData {
  *
  * See https://docs.codecov.io/v5.0.0/reference#section-get-a-single-commit.
  */
-export const codecovGetCommitCoverage = memoizeAsync(
+export const getCommitCoverage = memoizeAsync(
     async (
-        args: CodecovGetCommitCoverageArgs
+        args: RepoSpec & CommitSpec & APIOptions
     ): Promise<CodecovCommitData | null> => {
-        const response = await fetch(commitCoverageURL(args), {
+        const response = await fetch(commitApiURL(args).href, {
             method: 'GET',
             mode: 'cors',
         })
@@ -92,7 +118,29 @@ export const codecovGetCommitCoverage = memoizeAsync(
         }
         return await response.json()
     },
-    commitCoverageURL
+    options => commitApiURL(options).href
+)
+
+export const getTreeCoverage = memoizeAsync(
+    async (
+        args: RepoSpec & CommitSpec & PathSpec & APIOptions
+    ): Promise<CodecovTreeData | null> => {
+        if (!args.path.replace(/\/+$/, '')) {
+            throw new Error('Invalid path')
+        }
+        const response = await fetch(treeCoverageURL(args).href)
+        if (response.status === 404) {
+            console.warn(
+                `No Codecov coverage found for ${args.owner}/${args.repo}@${args.sha}/${args.path}`
+            )
+            return null
+        }
+        if (!response.ok) {
+            throw new Error('Error while getting Codecov commit data')
+        }
+        return await response.json()
+    },
+    options => commitApiURL(options).href
 )
 
 /**
@@ -100,20 +148,85 @@ export const codecovGetCommitCoverage = memoizeAsync(
  *
  * See https://docs.codecov.io/v5.0.0/reference#section-get-a-single-commit.
  */
-function commitCoverageURL({
+export function commitApiURL({
     baseURL,
     service,
     owner,
     repo,
     sha,
     token,
-}: CodecovGetCommitCoverageArgs): string {
-    const tokenSuffix = token
-        ? `&access_token=${encodeURIComponent(token)}`
-        : ''
+}: RepoSpec & CommitSpec & APIOptions): URL {
+    const url = new URL(
+        `${baseURL}/api/${service}/${owner}/${repo}/commits/${sha}`
+    )
+    // Necessary to get the data for all files in the response.
+    url.searchParams.set('src', 'extension')
+    setAccessToken(url, token)
+    return url
+}
 
-    // The ?src=extension is necessary to get the data for all files in the response.
-    return `${baseURL}/api/${service}/${owner}/${repo}/commits/${sha}?src=extension${tokenSuffix}`
+/**
+ * Adds the access token to a given URL if defined.
+ */
+export function setAccessToken(url: URL, token: string | undefined): void {
+    if (token) {
+        url.searchParams.set('access_token', token)
+    }
+}
+
+/**
+ * Constructs the URL for Codecov coverage data for a folder of a repository at a commit.
+ */
+function treeCoverageURL({
+    baseURL,
+    service,
+    owner,
+    repo,
+    sha,
+    token,
+    path,
+}: RepoSpec & CommitSpec & PathSpec & APIOptions): URL {
+    const url = new URL(
+        `${baseURL}/api/${service}/${owner}/${repo}/tree/${sha}/${path}`
+    )
+    setAccessToken(url, token)
+    return url
+}
+
+interface GetGraphSVGOptions extends RepoSpec, Partial<CommitSpec>, APIOptions {
+    graphType: 'icicle' | 'tree' | 'sunburst'
+}
+
+/**
+ * Get a graph SVG from the API as text.
+ */
+export async function getGraphSVG({
+    baseURL,
+    owner,
+    repo,
+    service,
+    sha,
+    graphType,
+    token,
+}: GetGraphSVGOptions): Promise<string | null> {
+    const url = new URL(`${baseURL}/api/${service}/${owner}/${repo}`)
+    if (sha) {
+        url.pathname += `/commit/${sha}`
+    }
+    url.pathname += `/graphs/${graphType}.svg`
+    setAccessToken(url, token)
+
+    const response = await fetch(url.href)
+    if (response.status === 404) {
+        return null
+    }
+    if (!response.ok) {
+        throw new Error(
+            `Could not fetch SVG: ${response.status} ${response.statusText}`
+        )
+    }
+
+    return await response.text()
 }
 
 /**
