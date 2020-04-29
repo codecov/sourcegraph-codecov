@@ -3,6 +3,7 @@ import { concatMap, filter, map, startWith, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import { Service } from './api'
 import { codecovToDecorations } from './decoration'
+import { graphViewProvider } from './insights'
 import {
     getCommitCoverageRatio,
     getFileCoverageRatios,
@@ -258,4 +259,14 @@ export function activate(
                 .update('codecov.endpoints', [{ ...endpoint, token }])
         }
     })
+
+    // Experimental: Show graphs on repository pages
+    if (sourcegraph.app.registerViewProvider) {
+        context.subscriptions.add(
+            sourcegraph.app.registerViewProvider(
+                'codecov.coverageGraph',
+                graphViewProvider
+            )
+        )
+    }
 }
