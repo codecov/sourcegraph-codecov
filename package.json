@@ -185,7 +185,7 @@
       "title": "Codecov settings",
       "properties": {
         "codecov.graphType": {
-          "description": "What type of graph to show on repository pages.",
+          "description": "The type of graph to show on repository pages.",
           "enum": [
             "sunburst",
             "icicle",
