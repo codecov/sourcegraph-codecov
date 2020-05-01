@@ -61,7 +61,7 @@ export function codecovParamsForRepositoryCommit(
 
     const knownHost = knownHosts.find(knownHost => uri.repo.includes(knownHost.name))
 
-    const service = (knownHost?.service) || endpoint.service || 'gh'
+    const service = knownHost?.service || endpoint.service || 'gh'
 
     const [, owner, repo] = uri.repo.split('/', 4)
 
