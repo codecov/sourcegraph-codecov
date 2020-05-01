@@ -252,8 +252,8 @@
   "scripts": {
     "prettier": "prettier 'src/**/*.{js?(on),ts}' --write --list-different",
     "prettier:check": "npm run prettier -- --write=false",
-    "tslint": "tslint -p tsconfig.json './src/**/*.ts'",
-    "tslint:fix": "npm run tslint -- --fix",
+    "eslint": "eslint './src/**/*.ts'",
+    "eslint:fix": "npm run eslint -- --fix",
     "typecheck": "tsc -p tsconfig.json",
     "build": "parcel build --out-file extension.js src/extension.ts",
     "serve": "npm run symlink-package && parcel serve --no-hmr --no-source-maps --out-file extension.js src/extension.ts",
@@ -286,11 +286,12 @@
     "last 1 Safari versions"
   ],
   "devDependencies": {
+    "@sourcegraph/eslint-config": "^0.16.2",
     "@sourcegraph/extension-api-stubs": "^1.0.0",
-    "@sourcegraph/tslint-config": "^13.4.0",
     "@types/mocha": "^5.2.7",
     "@types/mock-require": "^2.0.0",
     "@types/node": "^10.17.21",
+    "eslint": "^6.8.0",
     "lnfs-cli": "^2.1.0",
     "mkdirp": "^0.5.5",
     "mocha": "^5.2.0",
@@ -302,8 +303,6 @@
     "source-map-support": "^0.5.19",
     "sourcegraph": "^24.1.0",
     "ts-node": "^8.9.1",
-    "tslint": "^5.20.1",
-    "tslint-language-service": "^0.9.9",
     "typescript": "^3.8.3"
   }
 }

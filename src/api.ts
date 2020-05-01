@@ -14,6 +14,7 @@ export interface RepoSpec {
 export interface APIOptions {
     /**
      * The base URL of the Codecov instance.
+     *
      * @example https://codecov.io
      */
     baseURL: string
@@ -61,6 +62,7 @@ export interface CodecovCommitData {
                           l: {
                               /**
                                * The coverage for the line (1-indexed).
+                               *
                                * @type {number} number of hits on a fully covered line
                                * @type {string} "(partial hits)/branches" on a partially covered line
                                * @type {null} skipped line
@@ -112,7 +114,7 @@ export const getCommitCoverage = memoizeAsync(
         if (!response.ok) {
             throw new Error('Error while getting Codecov commit data')
         }
-        return await response.json()
+        return (await response.json()) as CodecovCommitData
     },
     options => commitApiURL(options).href
 )
@@ -130,7 +132,7 @@ export const getTreeCoverage = memoizeAsync(
         if (!response.ok) {
             throw new Error('Error while getting Codecov commit data')
         }
-        return await response.json()
+        return (await response.json()) as CodecovTreeData
     },
     options => commitApiURL(options).href
 )
@@ -205,14 +207,15 @@ export async function getGraphSVG({
         throw new Error(`Could not fetch SVG: ${response.status} ${response.statusText}`)
     }
 
-    return await response.text()
+    return response.text()
 }
 
 /**
  * Creates a function that memoizes the async result of func. If the Promise is rejected, the result will not be
  * cached.
  *
- * @param toKey etermines the cache key for storing the result based on the first argument provided to the memoized
+ * @param func The function to memoize
+ * @param toKey Determines the cache key for storing the result based on the first argument provided to the memoized
  * function
  */
 function memoizeAsync<P, T>(func: (params: P) => Promise<T>, toKey: (params: P) => string): (params: P) => Promise<T> {

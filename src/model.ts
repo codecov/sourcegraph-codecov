@@ -84,7 +84,7 @@ function toLineCoverage(data: CodecovCommitData, path: string): FileLineCoverage
 }
 
 function toCoverageRatio(fileData: CodecovCommitData['commit']['report']['files'][string]): number | undefined {
-    const ratioStr = fileData && fileData.t.c
+    const ratioStr = fileData?.t.c
     if (!ratioStr) {
         return undefined
     }

@@ -122,7 +122,7 @@ export function activate(
                 }
             }
         } catch (err) {
-            console.error(`Error loading Codecov file coverage: ${err}`)
+            console.error('Error loading Codecov file coverage:', err)
         }
         sourcegraph.internal.updateContext(context)
     }
@@ -159,12 +159,12 @@ export function activate(
         }
 
         const service = await sourcegraph.app.activeWindow.showInputBox({
-            prompt: `Version control type (gh/ghe/bb/gl):`,
+            prompt: 'Version control type (gh/ghe/bb/gl):',
             value: endpoint.service || '',
         })
 
         const url = await sourcegraph.app.activeWindow.showInputBox({
-            prompt: `Codecov endpoint:`,
+            prompt: 'Codecov endpoint:',
             value: endpoint.url || '',
         })
 
