@@ -175,9 +175,25 @@
         }
       ]
     },
+    "views": [
+      {
+        "id": "codecov.coverageGraph",
+        "where": "directory"
+      }
+    ],
     "configuration": {
       "title": "Codecov settings",
       "properties": {
+        "codecov.graphType": {
+          "description": "The type of graph to show on repository pages.",
+          "enum": [
+            "sunburst",
+            "icicle",
+            "tree",
+            null
+          ],
+          "default": null
+        },
         "codecov.decorations.lineCoverage": {
           "description": "Whether to decorate each line with a background color based on its coverage.",
           "type": "boolean",
@@ -270,7 +286,7 @@
     "last 1 Safari versions"
   ],
   "devDependencies": {
-    "@sourcegraph/extension-api-stubs": "^0.2.6",
+    "@sourcegraph/extension-api-stubs": "^1.0.0",
     "@sourcegraph/tslint-config": "^13.3.0",
     "@types/mocha": "^5.2.7",
     "@types/mock-require": "^2.0.0",
@@ -284,7 +300,7 @@
     "prettier": "^1.18.2",
     "rxjs": "^6.5.3",
     "source-map-support": "^0.5.12",
-    "sourcegraph": "^23.0.1",
+    "sourcegraph": "^24.1.0",
     "ts-node": "^8.9.1",
     "tslint": "^5.18.0",
     "tslint-language-service": "^0.9.9",
