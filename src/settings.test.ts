@@ -8,10 +8,7 @@ import { resolveSettings, Settings } from './settings'
 describe('Settings', () => {
     describe('decorations', () => {
         it('applies defaults when not set', () =>
-            assert.deepStrictEqual(
-                resolveSettings({})['codecov.decorations.lineCoverage'],
-                false
-            ))
+            assert.deepStrictEqual(resolveSettings({})['codecov.decorations.lineCoverage'], false))
 
         it('respects the hide property', () =>
             assert.deepStrictEqual(

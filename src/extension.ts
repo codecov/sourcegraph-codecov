@@ -4,27 +4,11 @@ import * as sourcegraph from 'sourcegraph'
 import { Service } from './api'
 import { codecovToDecorations } from './decoration'
 import { graphViewProvider } from './insights'
-import {
-    getCommitCoverageRatio,
-    getFileCoverageRatios,
-    getFileLineCoverage,
-} from './model'
-import {
-    configurationChanges,
-    Endpoint,
-    resolveEndpoint,
-    resolveSettings,
-    Settings,
-} from './settings'
-import {
-    codecovParamsForRepositoryCommit,
-    resolveDocumentURI,
-    resolveRootURI,
-} from './uri'
+import { getCommitCoverageRatio, getFileCoverageRatios, getFileLineCoverage } from './model'
+import { configurationChanges, Endpoint, resolveEndpoint, resolveSettings, Settings } from './settings'
+import { codecovParamsForRepositoryCommit, resolveDocumentURI, resolveRootURI } from './uri'
 
-const decorationType =
-    sourcegraph.app.createDecorationType &&
-    sourcegraph.app.createDecorationType()
+const decorationType = sourcegraph.app.createDecorationType && sourcegraph.app.createDecorationType()
 
 /** Entrypoint for the Codecov Sourcegraph extension. */
 export function activate(
@@ -39,35 +23,22 @@ export function activate(
     const editorsChanges = sourcegraph.app.activeWindowChanges
         ? from(sourcegraph.app.activeWindowChanges).pipe(
               filter(
-                  (
-                      activeWindow
-                  ): activeWindow is Exclude<typeof activeWindow, undefined> =>
-                      activeWindow !== undefined
+                  (activeWindow): activeWindow is Exclude<typeof activeWindow, undefined> => activeWindow !== undefined
               ),
               switchMap(activeWindow =>
-                  from(activeWindow.activeViewComponentChanges).pipe(
-                      map(() => activeWindow.visibleViewComponents)
-                  )
+                  from(activeWindow.activeViewComponentChanges).pipe(map(() => activeWindow.visibleViewComponents))
               )
               // Backcompat: rely on onDidOpenTextDocument if the extension host doesn't support activeWindowChanges / activeViewComponentChanges
           )
         : from(sourcegraph.workspace.onDidOpenTextDocument).pipe(
-              map(
-                  () =>
-                      (sourcegraph.app.activeWindow &&
-                          sourcegraph.app.activeWindow.visibleViewComponents) ||
-                      []
-              )
+              map(() => (sourcegraph.app.activeWindow && sourcegraph.app.activeWindow.visibleViewComponents) || [])
           )
 
     // When the configuration or current file changes, publish new decorations.
     //
     // TODO: Unpublish decorations on previously (but not currently) open files when settings changes, to avoid a
     // brief flicker of the old state when the file is reopened.
-    async function decorate(
-        settings: Readonly<Settings>,
-        editors: sourcegraph.ViewComponent[]
-    ): Promise<void> {
+    async function decorate(settings: Readonly<Settings>, editors: sourcegraph.ViewComponent[]): Promise<void> {
         const resolvedSettings = resolveSettings(settings)
         for (const editor of editors) {
             if (editor.type !== 'CodeEditor') {
@@ -81,10 +52,7 @@ export function activate(
             if (!decorations) {
                 continue
             }
-            editor.setDecorations(
-                decorationType,
-                codecovToDecorations(settings, decorations)
-            )
+            editor.setDecorations(decorationType, codecovToDecorations(settings, decorations))
         }
     }
 
@@ -133,31 +101,19 @@ export function activate(
         } = {}
 
         const p = codecovParamsForRepositoryCommit(lastURI, sourcegraph)
-        const repoURL = `${p.baseURL || 'https://codecov.io'}/${p.service}/${
-            p.owner
-        }/${p.repo}`
+        const repoURL = `${p.baseURL || 'https://codecov.io'}/${p.service}/${p.owner}/${p.repo}`
         context['codecov.repoURL'] = repoURL
         const baseFileURL = `${repoURL}/src/${p.sha}`
         context['codecov.commitURL'] = `${repoURL}/commit/${p.sha}`
 
         try {
             // Store overall commit coverage ratio.
-            const commitCoverage = await getCommitCoverageRatio(
-                lastURI,
-                endpoint,
-                sourcegraph
-            )
-            context['codecov.commitCoverage'] = commitCoverage
-                ? commitCoverage.toFixed(1)
-                : null
+            const commitCoverage = await getCommitCoverageRatio(lastURI, endpoint, sourcegraph)
+            context['codecov.commitCoverage'] = commitCoverage ? commitCoverage.toFixed(1) : null
 
             // Store coverage ratio (and Codecov report URL) for each file at this commit so that
             // template strings in contributions can refer to these values.
-            const fileRatios = await getFileCoverageRatios(
-                lastURI,
-                endpoint,
-                sourcegraph
-            )
+            const fileRatios = await getFileCoverageRatios(lastURI, endpoint, sourcegraph)
             if (fileRatios) {
                 for (const [path, ratio] of Object.entries(fileRatios)) {
                     const uri = `git://${lastURI.repo}?${lastURI.rev}#${path}`
@@ -174,13 +130,10 @@ export function activate(
     // Update the context when the configuration, workspace roots or active editors change.
     context.subscriptions.add(
         combineLatest([
-            configurationChanges.pipe(
-                map(settings => settings['codecov.endpoints'])
-            ),
+            configurationChanges.pipe(map(settings => settings['codecov.endpoints'])),
             from(
                 // Backcompat: rely on onDidChangeRoots if the extension host doesn't support rootChanges.
-                sourcegraph.workspace.rootChanges ||
-                    sourcegraph.workspace.onDidChangeRoots
+                sourcegraph.workspace.rootChanges || sourcegraph.workspace.onDidChangeRoots
             ).pipe(
                 map(() => sourcegraph.workspace.roots),
                 startWith(sourcegraph.workspace.roots)
@@ -199,52 +152,37 @@ export function activate(
             .subscribe()
     )
 
-    sourcegraph.commands.registerCommand(
-        'codecov.setupEnterprise',
-        async () => {
-            const endpoint = resolveEndpoint(
-                sourcegraph.configuration
-                    .get<Settings>()
-                    .get('codecov.endpoints')
-            )
-            if (!sourcegraph.app.activeWindow) {
-                throw new Error(
-                    'To set a Codecov Endpoint, navigate to a file and then re-run this command.'
-                )
-            }
-
-            const service = await sourcegraph.app.activeWindow.showInputBox({
-                prompt: `Version control type (gh/ghe/bb/gl):`,
-                value: endpoint.service || '',
-            })
-
-            const url = await sourcegraph.app.activeWindow.showInputBox({
-                prompt: `Codecov endpoint:`,
-                value: endpoint.url || '',
-            })
-
-            if (url !== undefined && service !== undefined) {
-                // TODO: Only supports setting the token of the first API endpoint.
-                return sourcegraph.configuration
-                    .get<Settings>()
-                    .update('codecov.endpoints', [
-                        { ...endpoint, url, service: service as Service },
-                    ])
-            }
+    sourcegraph.commands.registerCommand('codecov.setupEnterprise', async () => {
+        const endpoint = resolveEndpoint(sourcegraph.configuration.get<Settings>().get('codecov.endpoints'))
+        if (!sourcegraph.app.activeWindow) {
+            throw new Error('To set a Codecov Endpoint, navigate to a file and then re-run this command.')
         }
-    )
+
+        const service = await sourcegraph.app.activeWindow.showInputBox({
+            prompt: `Version control type (gh/ghe/bb/gl):`,
+            value: endpoint.service || '',
+        })
+
+        const url = await sourcegraph.app.activeWindow.showInputBox({
+            prompt: `Codecov endpoint:`,
+            value: endpoint.url || '',
+        })
+
+        if (url !== undefined && service !== undefined) {
+            // TODO: Only supports setting the token of the first API endpoint.
+            return sourcegraph.configuration
+                .get<Settings>()
+                .update('codecov.endpoints', [{ ...endpoint, url, service: service as Service }])
+        }
+    })
 
     // Handle the "Set Codecov API token" command (show the user a prompt for their token, and save
     // their input to settings).
     sourcegraph.commands.registerCommand('codecov.setAPIToken', async () => {
-        const endpoint = resolveEndpoint(
-            sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
-        )
+        const endpoint = resolveEndpoint(sourcegraph.configuration.get<Settings>().get('codecov.endpoints'))
 
         if (!sourcegraph.app.activeWindow) {
-            throw new Error(
-                'To set a Codecov API token, navigate to a file and then re-run this command.'
-            )
+            throw new Error('To set a Codecov API token, navigate to a file and then re-run this command.')
         }
 
         const token = await sourcegraph.app.activeWindow.showInputBox({
@@ -254,19 +192,12 @@ export function activate(
 
         if (token !== undefined) {
             // TODO: Only supports setting the token of the first API endpoint.
-            return sourcegraph.configuration
-                .get<Settings>()
-                .update('codecov.endpoints', [{ ...endpoint, token }])
+            return sourcegraph.configuration.get<Settings>().update('codecov.endpoints', [{ ...endpoint, token }])
         }
     })
 
     // Experimental: Show graphs on repository pages
     if (sourcegraph.app.registerViewProvider) {
-        context.subscriptions.add(
-            sourcegraph.app.registerViewProvider(
-                'codecov.coverageGraph',
-                graphViewProvider
-            )
-        )
+        context.subscriptions.add(sourcegraph.app.registerViewProvider('codecov.coverageGraph', graphViewProvider))
     }
 }

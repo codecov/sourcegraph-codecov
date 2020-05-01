@@ -22,12 +22,8 @@ export function resolveSettings(raw: Partial<Settings>): Settings {
     return {
         ['codecov.graphType']: raw['codecov.graphType'] || undefined,
         ['codecov.showCoverage']: raw['codecov.showCoverage'] !== false,
-        ['codecov.decorations.lineCoverage']: !!raw[
-            'codecov.decorations.lineCoverage'
-        ],
-        ['codecov.decorations.lineHitCounts']: !!raw[
-            'codecov.decorations.lineHitCounts'
-        ],
+        ['codecov.decorations.lineCoverage']: !!raw['codecov.decorations.lineCoverage'],
+        ['codecov.decorations.lineHitCounts']: !!raw['codecov.decorations.lineHitCounts'],
         ['codecov.endpoints']: [resolveEndpoint(raw['codecov.endpoints'])],
     }
 }
@@ -45,16 +41,12 @@ export const CODECOV_IO_URL = 'https://codecov.io'
  *
  * @todo support more than 1 endpoint
  */
-export function resolveEndpoint(
-    endpoints?: Readonly<Endpoint[]>
-): Readonly<Endpoint> {
+export function resolveEndpoint(endpoints?: Readonly<Endpoint[]>): Readonly<Endpoint> {
     if (!endpoints || endpoints.length === 0) {
         return { url: CODECOV_IO_URL }
     }
     return {
-        url: endpoints[0].url
-            ? urlWithOnlyProtocolAndHost(endpoints[0].url)
-            : CODECOV_IO_URL,
+        url: endpoints[0].url ? urlWithOnlyProtocolAndHost(endpoints[0].url) : CODECOV_IO_URL,
         token: endpoints[0].token || undefined,
         service: endpoints[0].service || undefined,
     }
@@ -68,13 +60,6 @@ function urlWithOnlyProtocolAndHost(urlStr: string): string {
 /**
  * The extension's resolved Settings.
  */
-export const configurationChanges: Observable<Settings> = new Observable<void>(
-    observer =>
-        sourcegraph.configuration.subscribe(observer.next.bind(observer))
-).pipe(
-    map(() =>
-        resolveSettings(
-            sourcegraph.configuration.get<Partial<Settings>>().value
-        )
-    )
-)
+export const configurationChanges: Observable<Settings> = new Observable<void>(observer =>
+    sourcegraph.configuration.subscribe(observer.next.bind(observer))
+).pipe(map(() => resolveSettings(sourcegraph.configuration.get<Partial<Settings>>().value)))

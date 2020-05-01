@@ -100,17 +100,13 @@ export interface CodecovTreeData {
  * See https://docs.codecov.io/v5.0.0/reference#section-get-a-single-commit.
  */
 export const getCommitCoverage = memoizeAsync(
-    async (
-        args: RepoSpec & CommitSpec & APIOptions
-    ): Promise<CodecovCommitData | null> => {
+    async (args: RepoSpec & CommitSpec & APIOptions): Promise<CodecovCommitData | null> => {
         const response = await fetch(commitApiURL(args).href, {
             method: 'GET',
             mode: 'cors',
         })
         if (response.status === 404) {
-            console.warn(
-                `No Codecov coverage found for ${args.owner}/${args.repo}@${args.sha}`
-            )
+            console.warn(`No Codecov coverage found for ${args.owner}/${args.repo}@${args.sha}`)
             return null
         }
         if (!response.ok) {
@@ -122,17 +118,13 @@ export const getCommitCoverage = memoizeAsync(
 )
 
 export const getTreeCoverage = memoizeAsync(
-    async (
-        args: RepoSpec & CommitSpec & PathSpec & APIOptions
-    ): Promise<CodecovTreeData | null> => {
+    async (args: RepoSpec & CommitSpec & PathSpec & APIOptions): Promise<CodecovTreeData | null> => {
         if (!args.path.replace(/\/+$/, '')) {
             throw new Error('Invalid path')
         }
         const response = await fetch(treeCoverageURL(args).href)
         if (response.status === 404) {
-            console.warn(
-                `No Codecov coverage found for ${args.owner}/${args.repo}@${args.sha}/${args.path}`
-            )
+            console.warn(`No Codecov coverage found for ${args.owner}/${args.repo}@${args.sha}/${args.path}`)
             return null
         }
         if (!response.ok) {
@@ -148,17 +140,8 @@ export const getTreeCoverage = memoizeAsync(
  *
  * See https://docs.codecov.io/v5.0.0/reference#section-get-a-single-commit.
  */
-export function commitApiURL({
-    baseURL,
-    service,
-    owner,
-    repo,
-    sha,
-    token,
-}: RepoSpec & CommitSpec & APIOptions): URL {
-    const url = new URL(
-        `${baseURL}/api/${service}/${owner}/${repo}/commits/${sha}`
-    )
+export function commitApiURL({ baseURL, service, owner, repo, sha, token }: RepoSpec & CommitSpec & APIOptions): URL {
+    const url = new URL(`${baseURL}/api/${service}/${owner}/${repo}/commits/${sha}`)
     // Necessary to get the data for all files in the response.
     url.searchParams.set('src', 'extension')
     setAccessToken(url, token)
@@ -186,9 +169,7 @@ function treeCoverageURL({
     token,
     path,
 }: RepoSpec & CommitSpec & PathSpec & APIOptions): URL {
-    const url = new URL(
-        `${baseURL}/api/${service}/${owner}/${repo}/tree/${sha}/${path}`
-    )
+    const url = new URL(`${baseURL}/api/${service}/${owner}/${repo}/tree/${sha}/${path}`)
     setAccessToken(url, token)
     return url
 }
@@ -221,9 +202,7 @@ export async function getGraphSVG({
         return null
     }
     if (!response.ok) {
-        throw new Error(
-            `Could not fetch SVG: ${response.status} ${response.statusText}`
-        )
+        throw new Error(`Could not fetch SVG: ${response.status} ${response.statusText}`)
     }
 
     return await response.text()
@@ -236,10 +215,7 @@ export async function getGraphSVG({
  * @param toKey etermines the cache key for storing the result based on the first argument provided to the memoized
  * function
  */
-function memoizeAsync<P, T>(
-    func: (params: P) => Promise<T>,
-    toKey: (params: P) => string
-): (params: P) => Promise<T> {
+function memoizeAsync<P, T>(func: (params: P) => Promise<T>, toKey: (params: P) => string): (params: P) => Promise<T> {
     const cache = new Map<string, Promise<T>>()
     return (params: P) => {
         const key = toKey(params)

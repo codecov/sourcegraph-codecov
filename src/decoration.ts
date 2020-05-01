@@ -4,10 +4,7 @@ import { FileLineCoverage, LineCoverage } from './model'
 import { Settings } from './settings'
 
 export function codecovToDecorations(
-    settings: Pick<
-        Settings,
-        'codecov.decorations.lineCoverage' | 'codecov.decorations.lineHitCounts'
-    >,
+    settings: Pick<Settings, 'codecov.decorations.lineCoverage' | 'codecov.decorations.lineHitCounts'>,
     data: FileLineCoverage
 ): TextDocumentDecoration[] {
     if (!data) {
@@ -53,9 +50,7 @@ function lineColor(coverage: LineCoverage, lightness: number): string {
     return hsl(62, 0.97, lightness) // partially covered, yellow
 }
 
-function lineText(
-    coverage: LineCoverage
-): { contentText?: string; hoverMessage?: string } {
+function lineText(coverage: LineCoverage): { contentText?: string; hoverMessage?: string } {
     if (coverage === null) {
         return {}
     }
@@ -63,9 +58,7 @@ function lineText(
         if (coverage >= 1) {
             return {
                 contentText: ` ${coverage} `,
-                hoverMessage: `${coverage} hit${
-                    coverage === 1 ? '' : 's'
-                } (CodeCov)`,
+                hoverMessage: `${coverage} hit${coverage === 1 ? '' : 's'} (CodeCov)`,
             }
         }
         return {

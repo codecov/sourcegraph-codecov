@@ -297,7 +297,7 @@
     "mock-require": "^3.0.3",
     "nyc": "^12.0.2",
     "parcel-bundler": "^1.12.4",
-    "prettier": "^1.19.1",
+    "prettier": "^2.0.5",
     "rxjs": "^6.5.5",
     "source-map-support": "^0.5.19",
     "sourcegraph": "^24.1.0",

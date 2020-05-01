@@ -14,16 +14,11 @@ export const graphViewProvider: sourcegraph.DirectoryViewProvider = {
             map(settings => settings['codecov.graphType']),
             distinctUntilChanged(),
             switchMap(async graphType => {
-                const { repo, rev, path } = resolveDocumentURI(
-                    viewer.directory.uri.href
-                )
+                const { repo, rev, path } = resolveDocumentURI(viewer.directory.uri.href)
                 if (!graphType) {
                     return null
                 }
-                const apiParams = codecovParamsForRepositoryCommit(
-                    { repo, rev },
-                    sourcegraph
-                )
+                const apiParams = codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph)
                 const coverage = path
                     ? await getTreeCoverage({ ...apiParams, path })
                     : await getCommitCoverage(apiParams)
@@ -67,9 +62,7 @@ export const graphViewProvider: sourcegraph.DirectoryViewProvider = {
                     title += `: ${coverageRatio.toFixed(0)}%`
                 }
 
-                const content = svg
-                    ? [{ type: sourcegraph.MarkupKind.Markdown, value: svg }]
-                    : []
+                const content = svg ? [{ type: sourcegraph.MarkupKind.Markdown, value: svg }] : []
 
                 return { title, content }
             })

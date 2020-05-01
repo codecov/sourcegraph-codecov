@@ -57,13 +57,9 @@ export function codecovParamsForRepositoryCommit(
     uri: Pick<ResolvedRootURI, 'repo' | 'rev'>,
     sourcegraph: typeof import('sourcegraph')
 ): RepoSpec & CommitSpec & APIOptions {
-    const endpoint = resolveEndpoint(
-        sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
-    )
+    const endpoint = resolveEndpoint(sourcegraph.configuration.get<Settings>().get('codecov.endpoints'))
 
-    const knownHost = knownHosts.find(knownHost =>
-        uri.repo.includes(knownHost.name)
-    )
+    const knownHost = knownHosts.find(knownHost => uri.repo.includes(knownHost.name))
 
     const service = (knownHost && knownHost.service) || endpoint.service || 'gh'
 

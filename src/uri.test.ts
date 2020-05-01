@@ -11,25 +11,18 @@ describe('resolveDocumentURI', () => {
     for (const p of UNSUPPORTED_SCHEMES) {
         it(`throws for ${p} uris`, () => {
             assert.throws(
-                () =>
-                    resolveDocumentURI(
-                        'git://github.com/sourcegraph/sourcegraph'
-                    ),
+                () => resolveDocumentURI('git://github.com/sourcegraph/sourcegraph'),
                 `Invalid protocol: ${p}`
             )
         })
     }
 
     it('throws if url.search is falsy', () => {
-        assert.throws(() =>
-            resolveDocumentURI('git://github.com/sourcegraph/sourcegraph')
-        )
+        assert.throws(() => resolveDocumentURI('git://github.com/sourcegraph/sourcegraph'))
     })
 
     it('throws if url.hash is falsy', () => {
-        assert.throws(() =>
-            resolveDocumentURI('git://github.com/sourcegraph/sourcegraph')
-        )
+        assert.throws(() => resolveDocumentURI('git://github.com/sourcegraph/sourcegraph'))
     })
 
     it('resolves git: URIs', () => {

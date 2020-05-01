@@ -1,10 +1,6 @@
 import { CodecovCommitData, getCommitCoverage } from './api'
 import { Endpoint } from './settings'
-import {
-    codecovParamsForRepositoryCommit,
-    ResolvedDocumentURI,
-    ResolvedRootURI,
-} from './uri'
+import { codecovParamsForRepositoryCommit, ResolvedDocumentURI, ResolvedRootURI } from './uri'
 
 export interface FileLineCoverage {
     [line: string]: LineCoverage
@@ -70,10 +66,7 @@ export async function getFileCoverageRatios(
     return ratios
 }
 
-function toLineCoverage(
-    data: CodecovCommitData,
-    path: string
-): FileLineCoverage {
+function toLineCoverage(data: CodecovCommitData, path: string): FileLineCoverage {
     const result: FileLineCoverage = {}
     const fileData = data.commit.report.files[path]
     if (fileData) {
@@ -82,9 +75,7 @@ function toLineCoverage(
             if (typeof value === 'number' || value === null) {
                 result[line] = value
             } else if (typeof value === 'string') {
-                const [hits, branches] = value
-                    .split('/', 2)
-                    .map(v => parseInt(v, 10))
+                const [hits, branches] = value.split('/', 2).map(v => parseInt(v, 10))
                 result[line] = { hits, branches }
             }
         }
@@ -92,9 +83,7 @@ function toLineCoverage(
     return result
 }
 
-function toCoverageRatio(
-    fileData: CodecovCommitData['commit']['report']['files'][string]
-): number | undefined {
+function toCoverageRatio(fileData: CodecovCommitData['commit']['report']['files'][string]): number | undefined {
     const ratioStr = fileData && fileData.t.c
     if (!ratioStr) {
         return undefined
