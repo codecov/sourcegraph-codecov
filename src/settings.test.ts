@@ -1,3 +1,7 @@
+import { createStubSourcegraphAPI } from '@sourcegraph/extension-api-stubs'
+import mock from 'mock-require'
+mock('sourcegraph', createStubSourcegraphAPI())
+
 import * as assert from 'assert'
 import { resolveSettings, Settings } from './settings'
 
@@ -26,6 +30,7 @@ describe('Settings', () => {
                     'codecov.decorations.lineHitCounts': true,
                 }),
                 {
+                    'codecov.graphType': undefined,
                     'codecov.decorations.lineCoverage': false,
                     'codecov.decorations.lineHitCounts': true,
                     'codecov.showCoverage': true,
@@ -39,6 +44,7 @@ describe('Settings', () => {
 
         it('applies defaults for the other properties', () =>
             assert.deepStrictEqual(resolveSettings({}), {
+                'codecov.graphType': undefined,
                 'codecov.decorations.lineCoverage': false,
                 'codecov.decorations.lineHitCounts': false,
                 'codecov.showCoverage': true,

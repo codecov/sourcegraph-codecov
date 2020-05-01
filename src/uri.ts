@@ -1,5 +1,5 @@
-import { CodecovGetCommitCoverageArgs } from './api'
-import { Endpoint, Settings } from './settings'
+import { APIOptions, CommitSpec, RepoSpec } from './api'
+import { resolveEndpoint, Settings } from './settings'
 
 /**
  * A resolved URI without an identified path.
@@ -42,10 +42,11 @@ export function resolveDocumentURI(uri: string): ResolvedDocumentURI {
     }
 }
 
-export interface KnownHost {
-    name: string
-    service: string
-}
+const knownHosts = [
+    { name: 'github.com', service: 'gh' },
+    { name: 'gitlab.com', service: 'gl' },
+    { name: 'bitbucket.org', service: 'bb' },
+] as const
 
 /**
  * Returns the URL parameters used to access the Codecov API for the URI's repository.
@@ -55,48 +56,25 @@ export interface KnownHost {
 export function codecovParamsForRepositoryCommit(
     uri: Pick<ResolvedRootURI, 'repo' | 'rev'>,
     sourcegraph: typeof import('sourcegraph')
-): Pick<
-    CodecovGetCommitCoverageArgs,
-    'baseURL' | 'service' | 'owner' | 'repo' | 'sha'
-> {
-    try {
-        const endpoints:
-            | Readonly<Endpoint[]>
-            | undefined = sourcegraph.configuration
-            .get<Settings>()
-            .get('codecov.endpoints')
-        const baseURL: string =
-            (endpoints && endpoints[0] && endpoints[0].url) || ''
+): RepoSpec & CommitSpec & APIOptions {
+    const endpoint = resolveEndpoint(
+        sourcegraph.configuration.get<Settings>().get('codecov.endpoints')
+    )
 
-        const knownHosts: KnownHost[] = [
-            { name: 'github.com', service: 'gh' },
-            { name: 'gitlab.com', service: 'gl' },
-            { name: 'bitbucket.org', service: 'bb' },
-        ]
+    const knownHost = knownHosts.find(knownHost =>
+        uri.repo.includes(knownHost.name)
+    )
 
-        const knownHost: KnownHost | undefined = knownHosts.find(knownHost =>
-            uri.repo.includes(knownHost.name)
-        )
+    const service = (knownHost && knownHost.service) || endpoint.service || 'gh'
 
-        let service: string =
-            (endpoints && endpoints[0] && endpoints[0].service) || 'gh'
+    const [, owner, repo] = uri.repo.split('/', 4)
 
-        const [, owner, repo] = uri.repo.split('/', 4)
-
-        service = (knownHost && knownHost.service) || service
-
-        return {
-            baseURL,
-            service,
-            owner,
-            repo,
-            sha: uri.rev,
-        }
-    } catch (err) {
-        throw new Error(
-            `extension does not yet support the repository ${JSON.stringify(
-                uri.repo
-            )}`
-        )
+    return {
+        baseURL: endpoint.url,
+        service,
+        owner,
+        repo,
+        sha: uri.rev,
+        token: endpoint.token,
     }
 }
