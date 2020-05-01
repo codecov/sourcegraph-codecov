@@ -1,3 +1,4 @@
+import { combineLatest, of } from 'rxjs'
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import { getCommitCoverage, getGraphSVG, getTreeCoverage } from './api'
@@ -13,58 +14,65 @@ export const graphViewProvider: sourcegraph.DirectoryViewProvider = {
         configurationChanges.pipe(
             map(settings => settings['codecov.graphType']),
             distinctUntilChanged(),
-            switchMap(async graphType => {
+            switchMap(graphType => {
                 const { repo, rev, path } = resolveDocumentURI(viewer.directory.uri.href)
                 if (!graphType) {
-                    return null
+                    return of(null)
                 }
                 const apiParams = codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph)
-                const coverage = path
-                    ? await getTreeCoverage({ ...apiParams, path })
-                    : await getCommitCoverage(apiParams)
 
-                // Try to get graph SVG
-                let svg: string | null = null
-                if (!path) {
-                    svg = await getGraphSVG({ ...apiParams, graphType })
-                    if (!svg) {
+                return combineLatest([
+                    // coverage
+                    path ? getTreeCoverage({ ...apiParams, path }) : getCommitCoverage(apiParams),
+
+                    // svg
+                    (async () => {
+                        if (path) {
+                            return null
+                        }
+                        // Try to get graph SVG
                         // Fallback to default branch if commit is not available
                         // TODO: Extension API should expose the rev instead
                         // https://github.com/sourcegraph/sourcegraph/issues/4278
-                        svg = await getGraphSVG({
-                            ...apiParams,
-                            sha: undefined,
-                            graphType,
-                        })
-                    }
-                }
+                        return (
+                            (await getGraphSVG({ ...apiParams, graphType })) ||
+                            (await getGraphSVG({
+                                ...apiParams,
+                                sha: undefined,
+                                graphType,
+                            }))
+                        )
+                    })(),
+                ]).pipe(
+                    map(([coverage, svg]) => {
+                        if (!svg && coverage === null) {
+                            // We don't have anything to show
+                            return null
+                        }
 
-                if (!svg && coverage === null) {
-                    // We don't have anything to show
-                    return null
-                }
+                        if (svg) {
+                            const repoLink = new URL(
+                                `${workspace.uri.hostname}${workspace.uri.pathname}@${rev}`,
+                                sourcegraph.internal.sourcegraphURL
+                            )
+                            svg = prepareSVG(svg, repoLink)
+                        }
 
-                if (svg) {
-                    const repoLink = new URL(
-                        `${workspace.uri.hostname}${workspace.uri.pathname}@${rev}`,
-                        sourcegraph.internal.sourcegraphURL
-                    )
-                    svg = prepareSVG(svg, repoLink)
-                }
+                        let title = 'Coverage'
+                        if (coverage !== null) {
+                            const coverageRatio =
+                                'folder_totals' in coverage.commit
+                                    ? parseFloat(coverage.commit.folder_totals.coverage)
+                                    : coverage.commit.totals.coverage
 
-                let title = 'Coverage'
-                if (coverage !== null) {
-                    const coverageRatio =
-                        'folder_totals' in coverage.commit
-                            ? parseFloat(coverage.commit.folder_totals.coverage)
-                            : coverage.commit.totals.coverage
+                            title += `: ${coverageRatio.toFixed(0)}%`
+                        }
 
-                    title += `: ${coverageRatio.toFixed(0)}%`
-                }
+                        const content = svg ? [{ type: sourcegraph.MarkupKind.Markdown, value: svg }] : []
 
-                const content = svg ? [{ type: sourcegraph.MarkupKind.Markdown, value: svg }] : []
-
-                return { title, content }
+                        return { title, content }
+                    })
+                )
             })
         ),
 }
