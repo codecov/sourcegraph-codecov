@@ -1,4 +1,4 @@
-import { combineLatest, of } from 'rxjs'
+import { combineLatest, of, concat } from 'rxjs'
 import { distinctUntilChanged, map, switchMap } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import { getCommitCoverage, getGraphSVG, getTreeCoverage } from './api'
@@ -23,26 +23,29 @@ export const graphViewProvider: sourcegraph.DirectoryViewProvider = {
 
                 return combineLatest([
                     // coverage
-                    path ? getTreeCoverage({ ...apiParams, path }) : getCommitCoverage(apiParams),
+                    concat([null], path ? getTreeCoverage({ ...apiParams, path }) : getCommitCoverage(apiParams)),
 
                     // svg
-                    (async () => {
-                        if (path) {
-                            return null
-                        }
-                        // Try to get graph SVG
-                        // Fallback to default branch if commit is not available
-                        // TODO: Extension API should expose the rev instead
-                        // https://github.com/sourcegraph/sourcegraph/issues/4278
-                        return (
-                            (await getGraphSVG({ ...apiParams, graphType })) ||
-                            (await getGraphSVG({
-                                ...apiParams,
-                                sha: undefined,
-                                graphType,
-                            }))
-                        )
-                    })(),
+                    concat(
+                        [null],
+                        (async () => {
+                            if (path) {
+                                return null
+                            }
+                            // Try to get graph SVG
+                            // Fallback to default branch if commit is not available
+                            // TODO: Extension API should expose the rev instead
+                            // https://github.com/sourcegraph/sourcegraph/issues/4278
+                            return (
+                                (await getGraphSVG({ ...apiParams, graphType })) ||
+                                (await getGraphSVG({
+                                    ...apiParams,
+                                    sha: undefined,
+                                    graphType,
+                                }))
+                            )
+                        })()
+                    ),
                 ]).pipe(
                     map(([coverage, svg]) => {
                         if (!svg && coverage === null) {
