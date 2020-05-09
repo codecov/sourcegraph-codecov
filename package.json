@@ -184,15 +184,21 @@
     "configuration": {
       "title": "Codecov settings",
       "properties": {
-        "codecov.graphType": {
-          "description": "The type of graph to show on repository pages.",
-          "enum": [
-            "sunburst",
-            "icicle",
-            "tree",
-            null
-          ],
-          "default": null
+        "codecov.insight.icicle": {
+          "description": "Show an interactive coverage icicle graph on repository pages.",
+          "type": "boolean"
+        },
+        "codecov.insight.tree": {
+          "description": "Show a coverage tree map on repository pages.",
+          "type": "boolean"
+        },
+        "codecov.insight.sunburst": {
+          "description": "Show a coverage sunburst graph on repository pages.",
+          "type": "boolean"
+        },
+        "codecov.insight.pie": {
+          "description": "Show a coverage pie chart on repository and directory pages.",
+          "type": "boolean"
         },
         "codecov.decorations.lineCoverage": {
           "description": "Whether to decorate each line with a background color based on its coverage.",

@@ -1,11 +1,11 @@
 import { combineLatest, from, Subscription } from 'rxjs'
-import { concatMap, filter, map, startWith, switchMap } from 'rxjs/operators'
+import { concatMap, filter, map, startWith, switchMap, distinctUntilChanged } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import { Service } from './api'
 import { codecovToDecorations } from './decoration'
-import { graphViewProvider } from './insights'
+import { createGraphViewProvider } from './insights'
 import { getCommitCoverageRatio, getFileCoverageRatios, getFileLineCoverage } from './model'
-import { configurationChanges, Endpoint, resolveEndpoint, resolveSettings, Settings } from './settings'
+import { configurationChanges, Endpoint, resolveEndpoint, resolveSettings, Settings, InsightSettings } from './settings'
 import { codecovParamsForRepositoryCommit, resolveDocumentURI, resolveRootURI } from './uri'
 
 const decorationType = sourcegraph.app.createDecorationType && sourcegraph.app.createDecorationType()
@@ -198,6 +198,27 @@ export function activate(
 
     // Experimental: Show graphs on repository pages
     if (sourcegraph.app.registerViewProvider) {
-        context.subscriptions.add(sourcegraph.app.registerViewProvider('codecov.coverageGraph', graphViewProvider))
+        const graphTypes: ['icicle', 'sunburst', 'tree', 'pie'] = ['icicle', 'sunburst', 'tree', 'pie']
+        for (const graphType of graphTypes) {
+            let subscription: sourcegraph.Unsubscribable = new Subscription()
+            context.subscriptions.add(
+                configurationChanges
+                    .pipe(
+                        map((settings): boolean => settings[`codecov.insight.${graphType}` as keyof InsightSettings]),
+                        distinctUntilChanged()
+                    )
+                    .subscribe(enabled => {
+                        if (enabled) {
+                            subscription = sourcegraph.app.registerViewProvider(
+                                `codecov.${graphType}`,
+                                createGraphViewProvider(graphType)
+                            )
+                            context.subscriptions.add(subscription)
+                        } else {
+                            subscription.unsubscribe()
+                        }
+                    })
+            )
+        }
     }
 }
