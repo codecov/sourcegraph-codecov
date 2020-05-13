@@ -307,7 +307,7 @@
     "prettier": "^2.0.5",
     "rxjs": "^6.5.5",
     "source-map-support": "^0.5.19",
-    "sourcegraph": "^24.1.0",
+    "sourcegraph": "^24.2.0",
     "ts-node": "^8.9.1",
     "typescript": "^3.8.3"
   }
