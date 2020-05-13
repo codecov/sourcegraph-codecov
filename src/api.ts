@@ -112,12 +112,25 @@ export const getCommitCoverage = memoizeAsync(
             return null
         }
         if (!response.ok) {
-            throw new Error('Error while getting Codecov commit data')
+            throw new Error(`Error response from Codecov API: ${response.status} ${response.statusText}`)
         }
         return (await response.json()) as CodecovCommitData
     },
     options => commitApiURL(options).href
 )
+
+/**
+ * Constructs the URL for Codecov coverage data for a single commit of a repository.
+ *
+ * See https://docs.codecov.io/v5.0.0/reference#section-get-a-single-commit.
+ */
+function commitApiURL({ baseURL, service, owner, repo, sha, token }: RepoSpec & CommitSpec & APIOptions): URL {
+    const url = new URL(`${baseURL}/api/${service}/${owner}/${repo}/commits/${sha}`)
+    // Necessary to get the data for all files in the response.
+    url.searchParams.set('src', 'extension')
+    setAccessToken(url, token)
+    return url
+}
 
 export const getTreeCoverage = memoizeAsync(
     async (args: RepoSpec & CommitSpec & PathSpec & APIOptions): Promise<CodecovTreeData | null> => {
@@ -130,25 +143,12 @@ export const getTreeCoverage = memoizeAsync(
             return null
         }
         if (!response.ok) {
-            throw new Error('Error while getting Codecov commit data')
+            throw new Error(`Error response from Codecov API: ${response.status} ${response.statusText}`)
         }
         return (await response.json()) as CodecovTreeData
     },
-    options => commitApiURL(options).href
+    options => treeCoverageURL(options).href
 )
-
-/**
- * Constructs the URL for Codecov coverage data for a single commit of a repository.
- *
- * See https://docs.codecov.io/v5.0.0/reference#section-get-a-single-commit.
- */
-export function commitApiURL({ baseURL, service, owner, repo, sha, token }: RepoSpec & CommitSpec & APIOptions): URL {
-    const url = new URL(`${baseURL}/api/${service}/${owner}/${repo}/commits/${sha}`)
-    // Necessary to get the data for all files in the response.
-    url.searchParams.set('src', 'extension')
-    setAccessToken(url, token)
-    return url
-}
 
 /**
  * Adds the access token to a given URL if defined.
