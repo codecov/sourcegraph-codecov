@@ -125,11 +125,15 @@ function prepareSVG(svg: string, repoLink: URL): string {
     // and we know the structure of the SVG
     return (
         svg
-            // Make sure SVG stretches to full width
-            .replace(/width="\d+"/, 'width="100%"')
+            // Make SVG responsive
+            .replace(/width="\d+"/, 'width="100%" style="flex: 1 1 0"')
+            .replace(/height="\d+"/, '')
+            // Remove weird double-slashes
             .replace(/\/\//g, '/')
             // Remove <title> and replace with data-tooltip used in Sourcegraph webapp
             .replace(/<title>[^<]*<\/title>/g, '')
+            // Make borders react to dark theme
+            .replace(/stroke="white"/g, 'stroke="var(--body-bg)"')
             // Link to directories
             .replace(
                 /^<rect (.+)data-content="(\/[^"]*)"(.+)<\/rect>$/gm,
