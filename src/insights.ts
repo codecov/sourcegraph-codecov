@@ -1,84 +1,119 @@
-import { combineLatest, of, concat } from 'rxjs'
-import { distinctUntilChanged, map, switchMap } from 'rxjs/operators'
+import { combineLatest, concat } from 'rxjs'
+import { map } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
 import { getCommitCoverage, getGraphSVG, getTreeCoverage } from './api'
-import { configurationChanges } from './settings'
 import { codecovParamsForRepositoryCommit, resolveDocumentURI } from './uri'
 
 /**
- * Shows the coverage graph on directory pages using the experimental view provider API.
+ * Returns a view provider that shows a coverage graph on directory pages using the experimental view provider API.
  */
-export const graphViewProvider: sourcegraph.DirectoryViewProvider = {
+export const createGraphViewProvider = (
+    graphType: 'icicle' | 'sunburst' | 'tree' | 'pie'
+): sourcegraph.DirectoryViewProvider => ({
     where: 'directory',
-    provideView: ({ workspace, viewer }) =>
-        configurationChanges.pipe(
-            map(settings => settings['codecov.graphType']),
-            distinctUntilChanged(),
-            switchMap(graphType => {
-                const { repo, rev, path } = resolveDocumentURI(viewer.directory.uri.href)
-                if (!graphType) {
-                    return of(null)
+    provideView: ({ workspace, viewer }) => {
+        const { repo, rev, path } = resolveDocumentURI(viewer.directory.uri.href)
+        const apiParams = codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph)
+
+        return combineLatest([
+            // coverage
+            concat([null], path ? getTreeCoverage({ ...apiParams, path }) : getCommitCoverage(apiParams)),
+
+            // svg
+            concat(
+                [null],
+                (async () => {
+                    // Codecov native SVG graphs are not available for subdirectories
+                    if (path || (graphType !== 'icicle' && graphType !== 'sunburst' && graphType !== 'tree')) {
+                        return null
+                    }
+                    // Try to get graph SVG
+                    // Fallback to default branch if commit is not available
+                    // TODO: Extension API should expose the rev instead
+                    // https://github.com/sourcegraph/sourcegraph/issues/4278
+                    return (
+                        (await getGraphSVG({ ...apiParams, graphType })) ||
+                        (await getGraphSVG({
+                            ...apiParams,
+                            sha: undefined,
+                            graphType,
+                        }))
+                    )
+                })()
+            ),
+        ]).pipe(
+            map(([coverage, svg]) => {
+                if (!svg && coverage === null) {
+                    // We don't have anything to show
+                    return null
                 }
-                const apiParams = codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph)
 
-                return combineLatest([
-                    // coverage
-                    concat([null], path ? getTreeCoverage({ ...apiParams, path }) : getCommitCoverage(apiParams)),
+                if (svg) {
+                    const repoLink = new URL(
+                        `${workspace.uri.hostname}${workspace.uri.pathname}@${rev}`,
+                        sourcegraph.internal.sourcegraphURL
+                    )
+                    svg = prepareSVG(svg, repoLink)
+                }
 
-                    // svg
-                    concat(
-                        [null],
-                        (async () => {
-                            if (path) {
-                                return null
-                            }
-                            // Try to get graph SVG
-                            // Fallback to default branch if commit is not available
-                            // TODO: Extension API should expose the rev instead
-                            // https://github.com/sourcegraph/sourcegraph/issues/4278
-                            return (
-                                (await getGraphSVG({ ...apiParams, graphType })) ||
-                                (await getGraphSVG({
-                                    ...apiParams,
-                                    sha: undefined,
-                                    graphType,
-                                }))
-                            )
-                        })()
-                    ),
-                ]).pipe(
-                    map(([coverage, svg]) => {
-                        if (!svg && coverage === null) {
-                            // We don't have anything to show
-                            return null
-                        }
+                const coverageRatio =
+                    coverage &&
+                    ('folder_totals' in coverage.commit
+                        ? parseFloat(coverage.commit.folder_totals.coverage)
+                        : coverage.commit.totals.coverage)
 
-                        if (svg) {
-                            const repoLink = new URL(
-                                `${workspace.uri.hostname}${workspace.uri.pathname}@${rev}`,
-                                sourcegraph.internal.sourcegraphURL
-                            )
-                            svg = prepareSVG(svg, repoLink)
-                        }
+                let title = 'Test coverage'
+                if (coverageRatio !== null && graphType !== 'pie') {
+                    title += `: ${coverageRatio.toFixed(0)}%`
+                }
 
-                        let title = 'Coverage'
-                        if (coverage !== null) {
-                            const coverageRatio =
-                                'folder_totals' in coverage.commit
-                                    ? parseFloat(coverage.commit.folder_totals.coverage)
-                                    : coverage.commit.totals.coverage
+                const content: (
+                    | sourcegraph.MarkupContent
+                    | sourcegraph.PieChartContent<{ name: string; value: number; fill: string }>
+                )[] =
+                    graphType === 'pie' && coverageRatio !== null
+                        ? [
+                              {
+                                  kind: sourcegraph.MarkupKind.Markdown,
+                                  value: 'Percentages of lines of code that are covered/not covered by tests.',
+                              },
+                              {
+                                  chart: 'pie',
+                                  pies: [
+                                      {
+                                          data: [
+                                              {
+                                                  name: 'Not covered',
+                                                  value: 100 - coverageRatio,
+                                                  fill: 'var(--danger)',
+                                              },
+                                              {
+                                                  name: 'Covered',
+                                                  value: coverageRatio,
+                                                  fill: 'var(--success)',
+                                              },
+                                          ],
+                                          dataKey: 'value',
+                                          nameKey: 'name',
+                                          fillKey: 'fill',
+                                      },
+                                  ],
+                              },
+                          ]
+                        : svg
+                        ? [
+                              {
+                                  kind: sourcegraph.MarkupKind.Markdown,
+                                  value: 'Distribution of test coverage across the codebase.\n' + svg,
+                              },
+                          ]
+                        : []
 
-                            title += `: ${coverageRatio.toFixed(0)}%`
-                        }
-
-                        const content = svg ? [{ type: sourcegraph.MarkupKind.Markdown, value: svg }] : []
-
-                        return { title, content }
-                    })
-                )
+                return { title, content }
             })
-        ),
-}
+        )
+    },
+})
 
 function prepareSVG(svg: string, repoLink: URL): string {
     // Always link to tree pages.

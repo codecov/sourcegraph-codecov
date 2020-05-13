@@ -24,7 +24,10 @@ describe('Settings', () => {
 
         it('respects the other properties', () => {
             const settings: Settings = {
-                'codecov.graphType': undefined,
+                'codecov.insight.sunburst': false,
+                'codecov.insight.icicle': false,
+                'codecov.insight.tree': false,
+                'codecov.insight.pie': false,
                 'codecov.decorations.lineCoverage': false,
                 'codecov.decorations.lineHitCounts': true,
                 'codecov.showCoverage': true,
@@ -45,7 +48,10 @@ describe('Settings', () => {
 
         it('applies defaults for the other properties', () => {
             const settings: Settings = {
-                'codecov.graphType': undefined,
+                'codecov.insight.tree': false,
+                'codecov.insight.icicle': false,
+                'codecov.insight.sunburst': false,
+                'codecov.insight.pie': false,
                 'codecov.decorations.lineCoverage': false,
                 'codecov.decorations.lineHitCounts': false,
                 'codecov.showCoverage': true,
