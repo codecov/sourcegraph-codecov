@@ -74,10 +74,6 @@ export const createGraphViewProvider = (
                     graphType === 'pie' && coverageRatio !== null
                         ? [
                               {
-                                  kind: sourcegraph.MarkupKind.Markdown,
-                                  value: 'Percentages of lines of code that are covered/not covered by tests.',
-                              },
-                              {
                                   chart: 'pie',
                                   pies: [
                                       {
@@ -101,15 +97,19 @@ export const createGraphViewProvider = (
                               },
                           ]
                         : svg
-                        ? [
-                              {
-                                  kind: sourcegraph.MarkupKind.Markdown,
-                                  value: 'Distribution of test coverage across the codebase.\n' + svg,
-                              },
-                          ]
+                        ? [{ kind: sourcegraph.MarkupKind.Markdown, value: svg }]
                         : []
 
-                return { title, content }
+                const subtitle =
+                    graphType === 'pie' && coverageRatio !== null
+                        ? 'Percentages of lines of code that are covered/not covered by tests.'
+                        : 'Distribution of test coverage across the codebase.'
+
+                return {
+                    title,
+                    subtitle,
+                    content,
+                }
             })
         )
     },
