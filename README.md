@@ -2,6 +2,7 @@
 
 [![Build Status](https://travis-ci.org/codecov/sourcegraph-codecov.svg?branch=master)](https://travis-ci.org/codecov/sourcegraph-codecov)
 [![codecov](https://codecov.io/gh/codecov/sourcegraph-codecov/branch/master/graph/badge.svg)](https://codecov.io/gh/codecov/sourcegraph-codecov)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcodecov%2Fsourcegraph-codecov.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcodecov%2Fsourcegraph-codecov?ref=badge_shield)
 
 A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing code coverage information from [Codecov](https://codecov.io) on GitHub, Sourcegraph, and other tools.
 
@@ -70,3 +71,7 @@ If you're using a self-hosted Sourcegraph instance (not required), you need to e
 
 1.  Open the Sourcegraph for Chrome/Firefox extension options page (by clicking the Sourcegraph icon in the browser toolbar)
 1.  Check the box labeled **Use Sourcegraph extensions**
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcodecov%2Fsourcegraph-codecov.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcodecov%2Fsourcegraph-codecov?ref=badge_large)
