@@ -25,7 +25,7 @@ A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing c
 
 1.  Install [Sourcegraph for Chrome](https://chrome.google.com/webstore/detail/sourcegraph/dgjhfomjieaadpoljlnidmbgkdffpack) or [Sourcegraph for Firefox](https://docs.sourcegraph.com/integration/browser_extension)
 1.  [Enable the Codecov extension on Sourcegraph](https://sourcegraph.com/extensions/sourcegraph/codecov)
-1.  Visit [tuf_store.go in theupdateframework/notary on GitHub](https://github.com/theupdateframework/notary/blob/fb795b0bc868746ed2efa2cd7109346bc7ddf0a4/server/storage/tuf_store.go) (or any other file in a public repository that has Codecov code coverage)
+1.  Visit [tuf_store.go in theupdateframework/notary on GitHub](https://github.com/theupdateframework/notary/blob/54749226dfcace398bbffe27f63564d50d1cf025/server/storage/tuf_store.go) (or any other file in a public repository that has Codecov code coverage)
 1.  Click the `Coverage: N%` button to toggle Codecov test coverage background colors on the file (scroll down if they aren't immediately visible)
 
 ![Screenshot](https://user-images.githubusercontent.com/1976/45107396-53d56880-b0ee-11e8-96e9-ca83e991101c.png)
