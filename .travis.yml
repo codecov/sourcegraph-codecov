@@ -3,4 +3,12 @@ language: node_js
 sudo: false
 
 node_js:
-  - "10"
+  - '10'
+
+script:
+  - npm run typecheck
+  - npm run eslint
+  - npm run prettier:check
+  - npm run cover
+  - nyc report --reporter json
+  - 'bash <(curl -s https://codecov.io/bash)'

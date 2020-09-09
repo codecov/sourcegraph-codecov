@@ -6,6 +6,11 @@
       "script": "watch:typecheck",
       "problemMatcher": ["$tsc-watch"],
       "isBackground": true
+    },
+    {
+      "type": "npm",
+      "script": "serve",
+      "problemMatcher": []
     }
   ]
 }
