@@ -9,10 +9,7 @@
     "url": "https://github.com/codecov/sourcegraph-codecov.git"
   },
   "categories": [
-    "Reports and stats",
-    "External services",
-    "Insights",
-    "Code analysis"
+    "Reports and stats"
   ],
   "tags": [
     "codecov",
