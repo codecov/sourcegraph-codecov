@@ -9,8 +9,8 @@
     "url": "https://github.com/codecov/sourcegraph-codecov.git"
   },
   "categories": [
-    "External services",
     "Reports and stats",
+    "External services",
     "Insights",
     "Code analysis"
   ],
