@@ -1,7 +1,7 @@
 import { combineLatest, from, Subscription } from 'rxjs'
 import { concatMap, filter, map, startWith, switchMap, distinctUntilChanged } from 'rxjs/operators'
 import * as sourcegraph from 'sourcegraph'
-import { Service } from './api'
+import { getCommitCoverage, getTreeCoverage, Service } from './api'
 import { codecovToDecorations } from './decoration'
 import { createGraphViewProvider } from './insights'
 import { getCommitCoverageRatio, getFileCoverageRatios, getFileLineCoverage } from './model'
@@ -220,5 +220,131 @@ export function activate(
                     })
             )
         }
+    }
+
+    // Experimental: file decorations
+    if ((sourcegraph as any)?.app?.registerFileDecorationProvider) {
+        interface FileDecoration {
+            uri: string
+            after?: {
+                contentText: string
+                color: string
+                hoverMessage?: string
+            }
+            meter?: {
+                value: number
+                min?: number
+                max?: number
+                low?: number
+                high?: number
+                optimum?: number
+                hoverMessage?: string
+            }
+        }
+
+        context.subscriptions.add(
+            (sourcegraph as any).app.registerFileDecorationProvider({
+                provideFileDecorations: async ({
+                    files,
+                    uri,
+                }: {
+                    uri: string
+                    files: {
+                        uri: string
+                        isDirectory: boolean
+                        name: string
+                        path: string
+                    }[]
+                }) => {
+                    const { repo, rev } = resolveDocumentURI(uri)
+                    const apiParams = codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph)
+
+                    // Fetch commit coverage to get ratio for files, tree coverage to get ratio for directories
+                    const nonDirectoryFiles = files.filter(file => !file.isDirectory)
+                    const directories = files.filter(file => file.isDirectory)
+                    const [commitCoverage, ...treeCoverages] = await Promise.allSettled([
+                        getCommitCoverage(apiParams),
+                        ...directories.map(async (dir, i) => {
+                            const treeCoverage = await getTreeCoverage({ ...apiParams, path: dir.path })
+                            return { treeCoverage, directory: directories[i] }
+                        }),
+                    ])
+
+                    // Iterate over files and get value from commit coverage to construct file decorations
+                    const fileDecorations: FileDecoration[] = []
+
+                    if (commitCoverage.status === 'fulfilled' && commitCoverage.value) {
+                        const { files: reportFiles } = commitCoverage.value.commit.report
+                        for (const file of nonDirectoryFiles) {
+                            const report = reportFiles[file.path]
+                            if (!report) {
+                                continue
+                            }
+
+                            const ratio = parseInt(report.t.c, 10)
+
+                            fileDecorations.push({
+                                uri: file.uri,
+                                after: {
+                                    contentText: `${ratio}%`,
+                                    color: 'gray',
+                                    hoverMessage: `the coverage ratio is ${ratio}%`,
+                                },
+                                meter: {
+                                    value: ratio,
+                                    hoverMessage: `the coverage ratio is ${ratio}%`,
+
+                                    min: 0,
+                                    low: 25,
+                                    high: 80,
+                                    max: 100,
+                                    optimum: 100,
+                                },
+                            })
+                        }
+                    }
+
+                    // Iterate over tree coverage results to construct directory decorations
+                    const directoryDecorations: FileDecoration[] = []
+
+                    for (const result of treeCoverages) {
+                        if (result.status === 'rejected') {
+                            continue
+                        }
+
+                        const { treeCoverage, directory } = result.value
+
+                        if (!treeCoverage) {
+                            continue
+                        }
+
+                        const ratio = parseInt(treeCoverage.commit.folder_totals.coverage, 0)
+
+                        directoryDecorations.push({
+                            uri: directory.uri,
+                            // We want to show 0%
+                            after: {
+                                contentText: `${ratio}%`,
+                                color: 'gray',
+                                hoverMessage: `the coverage ratio is ${ratio}%`,
+                            },
+
+                            meter: {
+                                value: ratio,
+                                hoverMessage: `the coverage ratio is ${ratio}%`,
+
+                                min: 0,
+                                low: 25,
+                                high: 80,
+                                max: 100,
+                                optimum: 100,
+                            },
+                        })
+                    }
+
+                    return [...fileDecorations, ...directoryDecorations]
+                },
+            })
+        )
     }
 }
