@@ -228,7 +228,7 @@ export function activate(
             uri: string
             after?: {
                 contentText: string
-                color: string
+                color?: string
                 hoverMessage?: string
             }
             meter?: {
@@ -239,6 +239,27 @@ export function activate(
                 high?: number
                 optimum?: number
                 hoverMessage?: string
+            }
+        }
+
+        function createFileDecoration(uri: string, ratio: number, settings: Settings): FileDecoration {
+            const after = {
+                contentText: `${ratio}%`,
+                hoverMessage: `Codecov: ${ratio}% covered`,
+            }
+
+            return {
+                uri,
+                after,
+                meter: {
+                    value: ratio,
+                    hoverMessage: `Codecov: ${ratio}% covered`,
+                    min: 0,
+                    max: 100,
+                    low: settings['codecov.fileDecorations.low'],
+                    high: settings['codecov.fileDecorations.high'],
+                    optimum: settings['codecov.fileDecorations.optimum'],
+                },
             }
         }
 
@@ -270,6 +291,11 @@ export function activate(
                         }),
                     ])
 
+                    const settings = resolveSettings(sourcegraph.configuration.get<Partial<Settings>>().value)
+                    if (!settings['codecov.fileDecorations.show']) {
+                        return []
+                    }
+
                     // Iterate over files and get value from commit coverage to construct file decorations
                     const fileDecorations: FileDecoration[] = []
 
@@ -283,24 +309,7 @@ export function activate(
 
                             const ratio = parseInt(report.t.c, 10)
 
-                            fileDecorations.push({
-                                uri: file.uri,
-                                after: {
-                                    contentText: `${ratio}%`,
-                                    color: 'gray',
-                                    hoverMessage: `the coverage ratio is ${ratio}%`,
-                                },
-                                meter: {
-                                    value: ratio,
-                                    hoverMessage: `the coverage ratio is ${ratio}%`,
-
-                                    min: 0,
-                                    low: 25,
-                                    high: 80,
-                                    max: 100,
-                                    optimum: 100,
-                                },
-                            })
+                            fileDecorations.push(createFileDecoration(file.uri, ratio, settings))
                         }
                     }
 
@@ -318,30 +327,10 @@ export function activate(
                             continue
                         }
 
-                        const ratio = parseInt(treeCoverage.commit.folder_totals.coverage, 0)
+                        const ratio = parseInt(treeCoverage.commit.folder_totals.coverage, 10)
 
-                        directoryDecorations.push({
-                            uri: directory.uri,
-                            // We want to show 0%
-                            after: {
-                                contentText: `${ratio}%`,
-                                color: 'gray',
-                                hoverMessage: `the coverage ratio is ${ratio}%`,
-                            },
-
-                            meter: {
-                                value: ratio,
-                                hoverMessage: `the coverage ratio is ${ratio}%`,
-
-                                min: 0,
-                                low: 25,
-                                high: 80,
-                                max: 100,
-                                optimum: 100,
-                            },
-                        })
+                        directoryDecorations.push(createFileDecoration(directory.uri, ratio, settings))
                     }
-
                     return [...fileDecorations, ...directoryDecorations]
                 },
             })

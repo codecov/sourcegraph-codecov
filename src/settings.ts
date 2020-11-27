@@ -10,13 +10,20 @@ export interface InsightSettings {
     ['codecov.insight.pie']: boolean
 }
 
+export interface FileDecorationSettings {
+    ['codecov.fileDecorations.low']: number
+    ['codecov.fileDecorations.high']: number
+    ['codecov.fileDecorations.optimum']: number
+    ['codecov.fileDecorations.show']: boolean
+}
+
 /**
  * The resolved and normalized settings for this extension, the result of calling resolveSettings on a raw settings
  * value.
  *
  * See the configuration JSON Schema in extension.json for the canonical documentation on these properties.
  */
-export interface Settings extends InsightSettings {
+export interface Settings extends InsightSettings, FileDecorationSettings {
     ['codecov.showCoverage']: boolean
     ['codecov.decorations.lineCoverage']: boolean
     ['codecov.decorations.lineHitCounts']: boolean
@@ -34,6 +41,10 @@ export function resolveSettings(raw: Partial<Settings>): Settings {
         ['codecov.decorations.lineCoverage']: !!raw['codecov.decorations.lineCoverage'],
         ['codecov.decorations.lineHitCounts']: !!raw['codecov.decorations.lineHitCounts'],
         ['codecov.endpoints']: [resolveEndpoint(raw['codecov.endpoints'])],
+        ['codecov.fileDecorations.low']: raw['codecov.fileDecorations.low'] ?? 70,
+        ['codecov.fileDecorations.high']: raw['codecov.fileDecorations.high'] ?? 99,
+        ['codecov.fileDecorations.optimum']: raw['codecov.fileDecorations.optimum'] ?? 100,
+        ['codecov.fileDecorations.show']: raw['codecov.fileDecorations.show'] || false
     }
 }
 

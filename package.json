@@ -207,6 +207,23 @@
           "type": "boolean",
           "default": true
         },
+        "codecov.fileDecorations.show": {
+          "description": "Whether to decorate each file in the file tree with a meter representing its coverage",
+          "type": "boolean",
+          "default": false
+        },
+        "codecov.fileDecorations.low": {
+          "type": "number",
+          "default": 70
+        },
+        "codecov.fileDecorations.high": {
+          "type": "number",
+          "default": 99
+        },
+        "codecov.fileDecorations.optimum": {
+          "type": "number",
+          "default": 100
+        },
         "codecov.decorations.lineHitCounts": {
           "description": "Whether to decorate the end of each covered line with the hit/branch stats.",
           "type": "boolean",
