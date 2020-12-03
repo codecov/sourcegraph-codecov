@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    "target": "es2018",
     "module": "es2015",
     "moduleResolution": "node",
-    "lib": ["es2020", "webworker"],
+    "lib": ["es2018", "ES2020.Promise", "webworker"],
     "sourceMap": true,
     "allowUnreachableCode": false,
     "esModuleInterop": true,

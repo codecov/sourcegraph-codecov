@@ -39,7 +39,7 @@ describe('Settings', () => {
                 'codecov.fileDecorations.low': 70,
                 'codecov.fileDecorations.high': 99,
                 'codecov.fileDecorations.optimum': 100,
-                'codecov.fileDecorations.show': false
+                'codecov.fileDecorations.show': false,
             }
             assert.deepStrictEqual(
                 resolveSettings({
@@ -63,12 +63,11 @@ describe('Settings', () => {
                     {
                         url: 'https://codecov.io',
                     },
-
                 ],
                 'codecov.fileDecorations.low': 70,
                 'codecov.fileDecorations.high': 99,
                 'codecov.fileDecorations.optimum': 100,
-                'codecov.fileDecorations.show': false
+                'codecov.fileDecorations.show': false,
             }
             assert.deepStrictEqual(resolveSettings({}), settings)
         })

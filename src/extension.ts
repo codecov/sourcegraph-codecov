@@ -7,6 +7,7 @@ import { createGraphViewProvider } from './insights'
 import { getCommitCoverageRatio, getFileCoverageRatios, getFileLineCoverage } from './model'
 import { configurationChanges, Endpoint, resolveEndpoint, resolveSettings, Settings, InsightSettings } from './settings'
 import { codecovParamsForRepositoryCommit, resolveDocumentURI, resolveRootURI } from './uri'
+import allSettled from 'promise.allsettled'
 
 const decorationType = sourcegraph.app.createDecorationType && sourcegraph.app.createDecorationType()
 
@@ -223,26 +224,10 @@ export function activate(
     }
 
     // Experimental: file decorations
-    if ((sourcegraph as any)?.app?.registerFileDecorationProvider) {
-        interface FileDecoration {
-            uri: string
-            after?: {
-                contentText: string
-                color?: string
-                hoverMessage?: string
-            }
-            meter?: {
-                value: number
-                min?: number
-                max?: number
-                low?: number
-                high?: number
-                optimum?: number
-                hoverMessage?: string
-            }
-        }
+    if (sourcegraph.app.registerFileDecorationProvider) {
+        allSettled.shim() // shim Promise.allSettled if necessary
 
-        function createFileDecoration(uri: string, ratio: number, settings: Settings): FileDecoration {
+        function createFileDecoration(uri: string, ratio: number, settings: Settings): sourcegraph.FileDecoration {
             const after = {
                 contentText: `${ratio}%`,
                 hoverMessage: `Codecov: ${ratio}% covered`,
@@ -264,19 +249,13 @@ export function activate(
         }
 
         context.subscriptions.add(
-            (sourcegraph as any).app.registerFileDecorationProvider({
-                provideFileDecorations: async ({
-                    files,
-                    uri,
-                }: {
-                    uri: string
-                    files: {
-                        uri: string
-                        isDirectory: boolean
-                        name: string
-                        path: string
-                    }[]
-                }) => {
+            sourcegraph.app.registerFileDecorationProvider({
+                provideFileDecorations: async ({ files, uri }) => {
+                    const settings = resolveSettings(sourcegraph.configuration.get<Partial<Settings>>().value)
+                    if (!settings['codecov.fileDecorations.show']) {
+                        return []
+                    }
+
                     const { repo, rev } = resolveDocumentURI(uri)
                     const apiParams = codecovParamsForRepositoryCommit({ repo, rev }, sourcegraph)
 
@@ -291,13 +270,8 @@ export function activate(
                         }),
                     ])
 
-                    const settings = resolveSettings(sourcegraph.configuration.get<Partial<Settings>>().value)
-                    if (!settings['codecov.fileDecorations.show']) {
-                        return []
-                    }
-
                     // Iterate over files and get value from commit coverage to construct file decorations
-                    const fileDecorations: FileDecoration[] = []
+                    const fileDecorations: sourcegraph.FileDecoration[] = []
 
                     if (commitCoverage.status === 'fulfilled' && commitCoverage.value) {
                         const { files: reportFiles } = commitCoverage.value.commit.report
@@ -314,7 +288,7 @@ export function activate(
                     }
 
                     // Iterate over tree coverage results to construct directory decorations
-                    const directoryDecorations: FileDecoration[] = []
+                    const directoryDecorations: sourcegraph.FileDecoration[] = []
 
                     for (const result of treeCoverages) {
                         if (result.status === 'rejected') {
