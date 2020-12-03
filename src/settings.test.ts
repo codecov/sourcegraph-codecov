@@ -37,7 +37,7 @@ describe('Settings', () => {
                     },
                 ],
                 'codecov.fileDecorations.low': 70,
-                'codecov.fileDecorations.high': 99,
+                'codecov.fileDecorations.high': 85,
                 'codecov.fileDecorations.optimum': 100,
                 'codecov.fileDecorations.show': false,
             }
@@ -65,7 +65,7 @@ describe('Settings', () => {
                     },
                 ],
                 'codecov.fileDecorations.low': 70,
-                'codecov.fileDecorations.high': 99,
+                'codecov.fileDecorations.high': 85,
                 'codecov.fileDecorations.optimum': 100,
                 'codecov.fileDecorations.show': false,
             }
