@@ -7,7 +7,6 @@ import { createGraphViewProvider } from './insights'
 import { getCommitCoverageRatio, getFileCoverageRatios, getFileLineCoverage } from './model'
 import { configurationChanges, Endpoint, resolveEndpoint, resolveSettings, Settings, InsightSettings } from './settings'
 import { codecovParamsForRepositoryCommit, resolveDocumentURI, resolveRootURI } from './uri'
-import allSettled from 'promise.allsettled'
 
 const decorationType = sourcegraph.app.createDecorationType && sourcegraph.app.createDecorationType()
 
@@ -225,8 +224,6 @@ export function activate(
 
     // Experimental: file decorations
     if (sourcegraph.app.registerFileDecorationProvider) {
-        allSettled.shim() // shim Promise.allSettled if necessary
-
         function createFileDecoration(uri: string, ratio: number, settings: Settings): sourcegraph.FileDecoration {
             const after = {
                 contentText: `${ratio}%`,

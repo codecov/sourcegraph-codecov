@@ -19,7 +19,7 @@ A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing c
 -   Line branches/hits annotations on files
 -   File coverage ratio indicator (`Coverage: N%`) and toggle button
 -   Support for using a Codecov API token to see coverage for private repositories
--   File and directory coverage decorations on Sourcegraph.com
+-   File and directory coverage decorations on Sourcegraph
 
 ## Usage
 
@@ -75,7 +75,7 @@ If you're using a self-hosted Sourcegraph instance (not required), you need to e
 
 #### File decorations
 
-Enable file decorations in user, organization or global settings.
+Enable file decorations in user, organization or global settings to see coverage status of files and directories in the file tree and on directory pages.
 
 ```jsonc
 {

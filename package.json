@@ -1,5 +1,5 @@
 {
-  "$schema": "https://raw.githubusercontent.com/sourcegraph/sourcegraph/master/shared/src/schema/extension.schema.json",
+  "$schema": "https://raw.githubusercontent.com/sourcegraph/sourcegraph/main/client/shared/src/schema/extension.schema.json",
   "name": "codecov",
   "publisher": "sourcegraph",
   "description": "Shows Codecov code coverage",
@@ -213,16 +213,25 @@
           "default": false
         },
         "codecov.fileDecorations.low": {
+          "description": "The highest coverage ratio in the 'low' range.",
           "type": "number",
-          "default": 70
+          "default": 70,
+          "minimum": 0,
+          "maximum": 100
         },
         "codecov.fileDecorations.high": {
+          "description": "The lowest coverage ratio in the 'high' range.",
           "type": "number",
-          "default": 85
+          "default": 85,
+          "minimum": 0,
+          "maximum": 100
         },
         "codecov.fileDecorations.optimum": {
+          "description": "The optimal coverage ratio.",
           "type": "number",
-          "default": 100
+          "default": 100,
+          "minimum": 0,
+          "maximum": 100
         },
         "codecov.decorations.lineHitCounts": {
           "description": "Whether to decorate the end of each covered line with the hit/branch stats.",
@@ -325,7 +334,6 @@
     "nyc": "^12.0.2",
     "parcel-bundler": "^1.12.4",
     "prettier": "^2.0.5",
-    "promise.allsettled": "^1.0.2",
     "rxjs": "^6.5.5",
     "source-map-support": "^0.5.19",
     "sourcegraph": "^24.8.0",

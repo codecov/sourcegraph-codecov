@@ -41,9 +41,9 @@ export function resolveSettings(raw: Partial<Settings>): Settings {
         ['codecov.decorations.lineCoverage']: !!raw['codecov.decorations.lineCoverage'],
         ['codecov.decorations.lineHitCounts']: !!raw['codecov.decorations.lineHitCounts'],
         ['codecov.endpoints']: [resolveEndpoint(raw['codecov.endpoints'])],
-        ['codecov.fileDecorations.low']: raw['codecov.fileDecorations.low'] || 70,
-        ['codecov.fileDecorations.high']: raw['codecov.fileDecorations.high'] || 85,
-        ['codecov.fileDecorations.optimum']: raw['codecov.fileDecorations.optimum'] || 100,
+        ['codecov.fileDecorations.low']: raw['codecov.fileDecorations.low'] ?? 70,
+        ['codecov.fileDecorations.high']: raw['codecov.fileDecorations.high'] ?? 85,
+        ['codecov.fileDecorations.optimum']: raw['codecov.fileDecorations.optimum'] ?? 100,
         ['codecov.fileDecorations.show']: raw['codecov.fileDecorations.show'] || false,
     }
 }
