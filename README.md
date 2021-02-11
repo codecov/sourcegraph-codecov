@@ -25,7 +25,7 @@ A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing c
 
 ### On GitHub using the Chrome extension
 
-1.  Install [Sourcegraph for Chrome](https://chrome.google.com/webstore/detail/sourcegraph/dgjhfomjieaadpoljlnidmbgkdffpack) or [Sourcegraph for Firefox](https://docs.sourcegraph.com/integration/browser_extension)
+1.  Install [Sourcegraph for Chrome](https://chrome.google.com/webstore/detail/sourcegraph/dgjhfomjieaadpoljlnidmbgkdffpack)
 1.  [Enable the Codecov extension on Sourcegraph](https://sourcegraph.com/extensions/sourcegraph/codecov)
 1.  Visit [tuf_store.go in theupdateframework/notary on GitHub](https://github.com/theupdateframework/notary/blob/master/server/storage/tuf_store.go) (or any other file in a public repository that has Codecov code coverage)
 1.  Click the `Coverage: N%` button to toggle Codecov test coverage background colors on the file (scroll down if they aren't immediately visible)
@@ -36,7 +36,7 @@ A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing c
 
 You can use the Codecov extension for private repositories on GitHub.com. Your code is never sent to Sourcegraph.
 
-1.  Follow the [Codecov extension usage instructions](https://github.com/codecov/sourcegraph-codecov#usage) above to install Sourcegraph for Chrome/Firefox
+1.  Follow the [Codecov extension usage instructions](https://github.com/codecov/sourcegraph-codecov#usage) above to install Sourcegraph for Chrome
 2.  Go to the command palette on GitHub (added by the Sourcegraph browser extension, see screenshot below) and choose "Codecov: Set API token for private repositories"
 3.  Enter your Codecov API token
 4.  Visit any file in a GitHub.com private repository that has Codecov coverage data
@@ -49,7 +49,7 @@ Your code is never sent to Sourcegraph. The Codecov extension runs on the client
 
 You can use this extension to overlay coverage information from your Codecov Enterprise install into GitHub Enterprise.
 
-1.  Follow the [Codecov extension usage instructions](https://github.com/codecov/sourcegraph-codecov#usage) above to install Sourcegraph for Chrome/Firefox
+1.  Follow the [Codecov extension usage instructions](https://github.com/codecov/sourcegraph-codecov#usage) above to install Sourcegraph for Chrome
 2.  From the command palette (added by the Sourcegraph browser extension, see screenshot above) on GitHub Enterprise click, "Codecov: Setup up Codecov Enterprise"
 3.  From the pop up that appears, set your Version control type to: `ghe`
 4.  From the next pop up that appears, set your Codecov endpoint, this is just the root level of your Codecov Enterprise domain, e.g., `https://codecov.mycompany.com`.
@@ -70,7 +70,7 @@ Note: Additional documentation, if needed, can be found in [Codecov's official d
 
 If you're using a self-hosted Sourcegraph instance (not required), you need to explicitly enable Sourcegraph extensions.
 
-1.  Open the Sourcegraph for Chrome/Firefox extension options page (by clicking the Sourcegraph icon in the browser toolbar)
+1.  Open the Sourcegraph for Chrome extension options page (by clicking the Sourcegraph icon in the browser toolbar)
 1.  Check the box labeled **Use Sourcegraph extensions**
 
 #### File decorations
