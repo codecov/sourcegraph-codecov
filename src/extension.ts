@@ -222,7 +222,8 @@ export function activate(
         }
     }
 
-    // Experimental: file decorations
+    // Experimental: file decorations. Check if the Sourcegraph instance supports
+    // file decoration providers (minimum Sourcegraph version 3.23)
     if (sourcegraph.app.registerFileDecorationProvider) {
         function createFileDecoration(uri: string, ratio: number, settings: Settings): sourcegraph.FileDecoration {
             const after = {
