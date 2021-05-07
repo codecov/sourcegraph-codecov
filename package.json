@@ -11,7 +11,6 @@
   "categories": [
     "External services",
     "Reports and stats",
-    "Insights",
     "Code analysis"
   ],
   "tags": [
@@ -321,7 +320,7 @@
   ],
   "devDependencies": {
     "@sourcegraph/eslint-config": "^0.16.2",
-    "@sourcegraph/extension-api-stubs": "^1.3.0",
+    "@sourcegraph/extension-api-stubs": "^1.4.0",
     "@types/mocha": "^5.2.7",
     "@types/mock-require": "^2.0.0",
     "@types/node": "^10.17.21",
