@@ -11,7 +11,6 @@
   "categories": [
     "External services",
     "Reports and stats",
-    "Insights",
     "Code analysis"
   ],
   "tags": [
@@ -321,7 +320,7 @@
   ],
   "devDependencies": {
     "@sourcegraph/eslint-config": "^0.16.2",
-    "@sourcegraph/extension-api-stubs": "^1.3.0",
+    "@sourcegraph/extension-api-stubs": "^1.4.0",
     "@types/mocha": "^5.2.7",
     "@types/mock-require": "^2.0.0",
     "@types/node": "^10.17.21",
@@ -336,7 +335,7 @@
     "prettier": "^2.0.5",
     "rxjs": "^6.5.5",
     "source-map-support": "^0.5.19",
-    "sourcegraph": "^24.8.0",
+    "sourcegraph": "^25.2.0",
     "ts-node": "^8.9.1",
     "typescript": "^3.8.3"
   }
