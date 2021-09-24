@@ -68,11 +68,6 @@ Note: Additional documentation, if needed, can be found in [Codecov's official d
 
 #### With a self-hosted Sourcegraph instance and the browser extension
 
-If you're using a self-hosted Sourcegraph instance (not required), you need to explicitly enable Sourcegraph extensions.
-
-1.  Open the Sourcegraph for Chrome extension options page (by clicking the Sourcegraph icon in the browser toolbar)
-1.  Check the box labeled **Use Sourcegraph extensions**
-
 #### File decorations
 
 Enable file decorations in user, organization or global settings to see coverage status of files and directories in the file tree and on directory pages.
