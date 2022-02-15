@@ -26,6 +26,7 @@
       {
         "name": "tslint-language-service"
       }
-    ]
+    ],
+    "strict": true
   }
 }
