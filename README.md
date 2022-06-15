@@ -6,8 +6,6 @@
 
 A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing code coverage information from [Codecov](https://codecov.io) on GitHub, Sourcegraph, and other tools.
 
-[**🎥 Demo video**](https://www.youtube.com/watch?v=j1eWBa3rWH8)
-
 [**🗃️ Source code**](https://github.com/codecov/sourcegraph-codecov)
 
 [**➕ Add to Sourcegraph**](https://sourcegraph.com/extensions/sourcegraph/codecov)
