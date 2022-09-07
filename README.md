@@ -4,6 +4,15 @@
 [![codecov](https://codecov.io/gh/codecov/sourcegraph-codecov/branch/master/graph/badge.svg)](https://codecov.io/gh/codecov/sourcegraph-codecov)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fcodecov%2Fsourcegraph-codecov.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Fcodecov%2Fsourcegraph-codecov?ref=badge_shield)
 
+## ⚠️ Deprecation notice
+
+**Sourcegraph extensions have been deprecated with the September 2022 Sourcegraph
+release. [Learn more](https://docs.sourcegraph.com/extensions/deprecation).**
+
+The repo and the docs below are kept to support older Sourcegraph versions.
+
+## Description
+
 A [Sourcegraph extension](https://docs.sourcegraph.com/extensions) for showing code coverage information from [Codecov](https://codecov.io) on GitHub, Sourcegraph, and other tools.
 
 [**🗃️ Source code**](https://github.com/codecov/sourcegraph-codecov)
