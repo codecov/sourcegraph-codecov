@@ -329,7 +329,7 @@
     "eslint": "^7.16.0",
     "lnfs-cli": "^2.1.0",
     "mkdirp": "^0.5.5",
-    "mocha": "^6.2.3",
+    "mocha": "^10.2.0",
     "mock-require": "^3.0.3",
     "nyc": "^15.0.0",
     "parcel-bundler": "^1.12.5",
